@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#14532d">
+<title>SGV Biodiversité — Registro de Visitas</title>
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icone-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SGV Visitas">
+<style>
+:root{
+  --verde:#14532d; --verde2:#166534; --verde3:#22c55e; --verde-cl:#dcfce7;
+  --ouro:#b45309; --ouro-cl:#fef3c7;
+  --tinta:#111827; --tinta2:#374151; --tinta3:#6b7280; --tinta4:#9ca3af;
+  --linha:#e5e7eb; --fundo:#f7f8f7; --papel:#ffffff;
+  --erro:#b91c1c; --erro-cl:#fee2e2;
+  --info:#1d4ed8; --info-cl:#dbeafe;
+  --r:14px; --sombra:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.1);
+  --sombra-g:0 4px 6px -1px rgba(16,24,40,.08),0 10px 15px -3px rgba(16,24,40,.08);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  background:var(--fundo); color:var(--tinta); font-size:15px; line-height:1.45;
+  -webkit-font-smoothing:antialiased;
+}
+#app{max-width:520px;margin:0 auto;min-height:100vh;background:var(--fundo);position:relative;padding-bottom:76px}
+button,input,select,textarea{font-family:inherit;font-size:16px}
+
+/* ---------- TOPO ---------- */
+.topo{
+  position:sticky;top:0;z-index:40;background:var(--verde);color:#fff;
+  padding:calc(10px + env(safe-area-inset-top)) 16px 10px;
+  display:flex;align-items:center;gap:10px;box-shadow:var(--sombra)
+}
+.topo h1{font-size:16px;margin:0;font-weight:600;letter-spacing:.2px;flex:1}
+.topo .sub{font-size:11.5px;opacity:.75;font-weight:400;display:block;margin-top:1px}
+.btn-voltar{background:rgba(255,255,255,.16);border:0;color:#fff;width:32px;height:32px;border-radius:9px;font-size:17px;line-height:1;cursor:pointer;flex:none}
+.pill-rede{font-size:10.5px;font-weight:700;padding:4px 8px;border-radius:20px;letter-spacing:.4px;flex:none}
+.pill-rede.on{background:rgba(255,255,255,.2)}
+.pill-rede.off{background:var(--ouro);color:#fff}
+
+/* ---------- ESTRUTURA ---------- */
+.tela{display:none;padding:14px 14px 20px;animation:entra .18s ease}
+.tela.ativa{display:block}
+@keyframes entra{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+.cartao{background:var(--papel);border:1px solid var(--linha);border-radius:var(--r);padding:14px;margin-bottom:12px;box-shadow:var(--sombra)}
+.cartao.plano{box-shadow:none}
+.titulo-secao{font-size:11px;font-weight:700;color:var(--tinta3);text-transform:uppercase;letter-spacing:.8px;margin:18px 0 8px}
+.titulo-secao:first-child{margin-top:0}
+
+/* ---------- KPI ---------- */
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.kpi{background:var(--papel);border:1px solid var(--linha);border-radius:var(--r);padding:12px 13px;box-shadow:var(--sombra)}
+.kpi .n{font-size:26px;font-weight:700;letter-spacing:-.6px;line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi .r{font-size:11px;color:var(--tinta3);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-top:3px}
+.kpi.destaque{background:var(--verde);border-color:var(--verde);color:#fff}
+.kpi.destaque .r{color:rgba(255,255,255,.72)}
+.kpi.alerta{background:var(--ouro-cl);border-color:#fcd34d}
+.kpi.alerta .n{color:var(--ouro)}
+
+.barra{height:7px;background:var(--linha);border-radius:99px;overflow:hidden;margin-top:9px}
+.barra i{display:block;height:100%;background:var(--verde3);border-radius:99px;transition:width .5s ease}
+.kpi.destaque .barra{background:rgba(255,255,255,.22)}
+.kpi.destaque .barra i{background:#86efac}
+
+/* ---------- FORM ---------- */
+label.campo{display:block;margin-bottom:13px}
+label.campo>span{display:block;font-size:12px;font-weight:600;color:var(--tinta2);margin-bottom:5px}
+label.campo>span em{font-style:normal;color:var(--erro)}
+label.campo>span small{font-weight:400;color:var(--tinta4);font-size:11px}
+input[type=text],input[type=date],input[type=number],input[type=tel],input[type=email],select,textarea{
+  width:100%;padding:11px 12px;border:1px solid #d1d5db;border-radius:10px;background:#fff;color:var(--tinta);
+  outline:none;transition:border-color .15s,box-shadow .15s
+}
+textarea{min-height:74px;resize:vertical;line-height:1.5}
+input:focus,select:focus,textarea:focus{border-color:var(--verde2);box-shadow:0 0 0 3px var(--verde-cl)}
+input.erro,select.erro{border-color:var(--erro);background:#fff5f5}
+select{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8'><path d='M1 1l5 5 5-5' stroke='%236b7280' stroke-width='2' fill='none' stroke-linecap='round'/></svg>");background-repeat:no-repeat;background-position:right 12px center;padding-right:34px}
+.dupla{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tripla{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.ajuda{font-size:11.5px;color:var(--tinta3);margin-top:4px;line-height:1.4}
+.msg-erro{font-size:11.5px;color:var(--erro);margin-top:4px;font-weight:600;display:none}
+.msg-erro.on{display:block}
+
+/* chips de escolha */
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{
+  padding:9px 13px;border:1px solid #d1d5db;border-radius:20px;background:#fff;
+  font-size:13.5px;cursor:pointer;user-select:none;transition:all .13s;color:var(--tinta2);font-weight:500
+}
+.chip:active{transform:scale(.96)}
+.chip.on{background:var(--verde);border-color:var(--verde);color:#fff;font-weight:600}
+.chip.on.ouro{background:var(--ouro);border-color:var(--ouro)}
+
+/* estrelas / escala */
+.escala{display:flex;gap:6px}
+.escala button{
+  flex:1;padding:11px 0;border:1px solid #d1d5db;background:#fff;border-radius:10px;
+  font-size:19px;cursor:pointer;transition:all .13s;line-height:1
+}
+.escala button.on{background:var(--verde-cl);border-color:var(--verde3);transform:translateY(-1px)}
+.escala-legenda{display:flex;justify-content:space-between;font-size:10.5px;color:var(--tinta4);margin-top:4px}
+
+/* botões */
+.btn{
+  display:block;width:100%;padding:14px;border:0;border-radius:12px;background:var(--verde);color:#fff;
+  font-size:15.5px;font-weight:600;cursor:pointer;transition:all .15s;text-align:center
+}
+.btn:active{transform:scale(.985);background:var(--verde2)}
+.btn:disabled{background:#d1d5db;color:#9ca3af;cursor:not-allowed}
+.btn.sec{background:#fff;color:var(--verde);border:1.5px solid var(--verde)}
+.btn.neutro{background:#fff;color:var(--tinta2);border:1px solid #d1d5db}
+.btn.perigo{background:var(--erro-cl);color:var(--erro);border:1px solid #fca5a5}
+.btn.peq{padding:9px 14px;font-size:13.5px;width:auto;display:inline-block}
+.linha-btn{display:flex;gap:9px;margin-top:6px}
+.linha-btn .btn{flex:1}
+
+/* ---------- WIZARD ---------- */
+.passos{display:flex;gap:5px;padding:12px 14px 0}
+.passos i{flex:1;height:4px;background:var(--linha);border-radius:9px;transition:background .3s}
+.passos i.feito{background:var(--verde3)}
+.passos i.atual{background:var(--verde)}
+.passo-nome{padding:8px 14px 0;font-size:11px;color:var(--tinta3);font-weight:700;text-transform:uppercase;letter-spacing:.7px}
+
+/* ---------- LISTAS ---------- */
+.item{
+  display:flex;align-items:center;gap:11px;padding:12px 13px;background:var(--papel);
+  border:1px solid var(--linha);border-radius:12px;margin-bottom:8px;box-shadow:var(--sombra)
+}
+.item .txt{flex:1;min-width:0}
+.item .t{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item .s{font-size:11.5px;color:var(--tinta3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.selo{font-size:9.5px;font-weight:800;padding:3px 7px;border-radius:6px;letter-spacing:.4px;flex:none;text-transform:uppercase}
+.selo.ok{background:var(--verde-cl);color:var(--verde)}
+.selo.fila{background:var(--ouro-cl);color:var(--ouro)}
+.selo.erro{background:var(--erro-cl);color:var(--erro)}
+.selo.info{background:var(--info-cl);color:var(--info)}
+.selo.cinza{background:#f3f4f6;color:var(--tinta3)}
+
+.vazio{text-align:center;padding:40px 20px;color:var(--tinta4)}
+.vazio .ic{font-size:38px;margin-bottom:10px;opacity:.5}
+.vazio p{margin:0;font-size:13.5px}
+
+/* contador de brinde */
+.contador{display:flex;align-items:center;gap:0;border:1px solid #d1d5db;border-radius:9px;overflow:hidden;flex:none;background:#fff}
+.contador button{width:34px;height:34px;border:0;background:#fff;font-size:18px;cursor:pointer;color:var(--verde);font-weight:700;line-height:1}
+.contador button:active{background:var(--verde-cl)}
+.contador button:disabled{color:#d1d5db}
+.contador span{width:32px;text-align:center;font-weight:700;font-size:14px;font-variant-numeric:tabular-nums}
+
+/* ---------- NAV ---------- */
+.nav{
+  position:fixed;bottom:0;left:0;right:0;max-width:520px;margin:0 auto;background:var(--papel);
+  border-top:1px solid var(--linha);display:flex;z-index:50;
+  padding-bottom:env(safe-area-inset-bottom);box-shadow:0 -1px 3px rgba(16,24,40,.05)
+}
+.nav button{
+  flex:1;background:none;border:0;padding:8px 2px 7px;cursor:pointer;color:var(--tinta4);
+  display:flex;flex-direction:column;align-items:center;gap:2px;transition:color .15s;position:relative
+}
+.nav button.on{color:var(--verde)}
+.nav .ic{font-size:20px;line-height:1}
+.nav .rot{font-size:9.5px;font-weight:700;letter-spacing:.2px}
+.nav .bolha{
+  position:absolute;top:4px;right:50%;margin-right:-20px;background:var(--ouro);color:#fff;
+  font-size:9px;font-weight:800;min-width:16px;height:16px;border-radius:9px;
+  display:flex;align-items:center;justify-content:center;padding:0 4px
+}
+
+/* ---------- AVISOS ---------- */
+.aviso{padding:11px 13px;border-radius:11px;font-size:12.5px;margin-bottom:12px;line-height:1.5;border:1px solid}
+.aviso.amarelo{background:var(--ouro-cl);border-color:#fcd34d;color:#78350f}
+.aviso.azul{background:var(--info-cl);border-color:#93c5fd;color:#1e3a8a}
+.aviso.verde{background:var(--verde-cl);border-color:#86efac;color:#14532d}
+.aviso.vermelho{background:var(--erro-cl);border-color:#fca5a5;color:#7f1d1d}
+.aviso b{font-weight:700}
+
+/* toast */
+#toast{
+  position:fixed;left:50%;bottom:88px;transform:translate(-50%,20px);background:var(--tinta);color:#fff;
+  padding:12px 18px;border-radius:11px;font-size:13.5px;font-weight:500;z-index:200;opacity:0;
+  pointer-events:none;transition:all .26s;max-width:400px;width:calc(100% - 40px);text-align:center;box-shadow:var(--sombra-g)
+}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+#toast.ok{background:var(--verde)}
+#toast.err{background:var(--erro)}
+
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(17,24,39,.5);z-index:150;display:none;align-items:flex-end;justify-content:center}
+.modal.on{display:flex}
+.modal-cx{background:#fff;border-radius:18px 18px 0 0;width:100%;max-width:520px;max-height:88vh;overflow-y:auto;padding:18px 16px calc(18px + env(safe-area-inset-bottom));animation:sobe .24s ease}
+@keyframes sobe{from{transform:translateY(100%)}to{transform:none}}
+.modal-cx h3{margin:0 0 4px;font-size:17px}
+.puxador{width:38px;height:4px;background:var(--linha);border-radius:9px;margin:0 auto 14px}
+
+/* busca */
+.busca{position:relative;margin-bottom:10px}
+.busca input{padding-left:36px}
+.busca:before{content:"🔍";position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:14px;opacity:.5}
+
+.resultados{max-height:230px;overflow-y:auto;border:1px solid var(--linha);border-radius:11px;background:#fff;margin-top:-4px}
+.resultados div{padding:11px 13px;border-bottom:1px solid #f3f4f6;cursor:pointer}
+.resultados div:last-child{border-bottom:0}
+.resultados div:active{background:var(--verde-cl)}
+.resultados .rt{font-weight:600;font-size:13.5px}
+.resultados .rs{font-size:11.5px;color:var(--tinta3)}
+
+.tabela{width:100%;border-collapse:collapse;font-size:11.5px}
+.tabela th{background:#f9fafb;text-align:left;padding:7px 8px;font-weight:700;color:var(--tinta2);border-bottom:1px solid var(--linha);white-space:nowrap}
+.tabela td{padding:7px 8px;border-bottom:1px solid #f3f4f6;color:var(--tinta2)}
+.rolagem{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--linha);border-radius:11px;background:#fff}
+
+.divisor{height:1px;background:var(--linha);margin:14px 0}
+.mini{font-size:11.5px;color:var(--tinta3);line-height:1.5}
+.centro{text-align:center}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast"></div>
+<div class="modal" id="modal"><div class="modal-cx" id="modal-cx"></div></div>
+<script>
+/* ==========================================================================
+   SGV BIODIVERSITÉ — App do Visitador (protótipo navegável)
+   Arquitetura: PWA offline-first. Grava local primeiro, sincroniza depois.
+   ========================================================================== */
+
+/* ---------- CATÁLOGOS (na produção vêm da planilha no 1º login) ---------- */
+const CAT = {
+  visitadores: [
+    {id:'V01', nome:'CILAS',        perfil:'VISITADOR', meta:80, base:'CATANDUVA (SP)'},
+    {id:'V02', nome:'FRANCISCO',    perfil:'VISITADOR', meta:80, base:'RIO DE JANEIRO (RJ)'},
+    {id:'V03', nome:'ROSA MARIA',   perfil:'VISITADOR', meta:80, base:'SÃO PAULO (SP)'},
+    {id:'V04', nome:'GUSTAVO CASTRO',perfil:'VISITADOR',meta:80, base:'LONDRINA (PR)'},
+    {id:'V05', nome:'ANDERSON',     perfil:'VISITADOR', meta:80, base:'BELO HORIZONTE (MG)'},
+    {id:'V06', nome:'PAULO',        perfil:'VENDEDOR',  meta:35, base:'SÃO PAULO (SP)'},
+    {id:'V07', nome:'ANA PAULA',    perfil:'VENDEDOR',  meta:35, base:'CURITIBA (PR)'}
+  ],
+  acao:      ['VISITA','PROSPECÇÃO','FOLLOW UP','EVENTO','TREINAMENTO'],
+  modalidade:['PRESENCIAL','ONLINE','TELEFONE','WHATSAPP'],
+  tipoCliente:['MÉDICO','FARMÁCIA','CLÍNICA','DENTISTA','OUTRO PROFISSIONAL'],
+  status:    ['REALIZADA','REAGENDADA','CANCELADA','NÃO ATENDEU'],
+  conhece:   ['NÃO CONHECE','JÁ OUVIU FALAR','CONHECE','JÁ PRESCREVE','PRESCREVE E COMPRA'],
+  interesse: ['SEM INTERESSE','INTERESSE BAIXO','INTERESSE MÉDIO','INTERESSE ALTO','PEDIU ORÇAMENTO'],
+
+  especialidades: ["ACUPUNTURA","ALERGIA E IMUNOLOGIA","ALERGISTA","ANESTESIOLOGIA","ANGIOLOGIA","BIOMEDICO","CARDIOLOGIA","CIRURGIA CARDIOVASCULAR","CIRURGIA DA MAO","CIRURGIA DE CABEÇA E PESCOÇO","CIRURGIA DO APARELHO DIGESTIVO","CIRURGIA GERAL","CIRURGIA ONCOLOGICA","CIRURGIA PEDIATRICA","CIRURGIA PLASTICA","CIRURGIA TORACICA","CIRURGIA VASCULAR","CLINICA MEDICA","CLINICO GERAL","COLOPROCTOLOGIA","DENTISTA","DENTISTA HOF","DERMATO GINECOLOGISTA","DERMATO NUTROLOGO","DERMATO TRICOLOGISTA","DERMATOLOGIA INTEGRATIVA","DERMATOLOGISTA","ENDOCRINOLOGIA E METABOLOGIA","ENDOCRINOLOGISTA","ENDOSCOPIA","ENDROCRINOLOGISTA PEDIATRA","ENFERMEIRA ESTETA","ESTETICISTA","FARMACEUTICO","FISIOTERAPEUTA","GASTROENTEROLOGIA","GENETICA MEDICA","GERIATRIA","GINECOLOGIA E OBSTETRICIA","GINECOLOGISTA","GINECOLOGISTA E TRICOLOGISTA","HEMATOLOGIA E HEMOTERAPIA","HOMEOPATIA","INFECTOLOGIA","INTEGRATIVA","MASTOLOGIA","MEDICINA DE EMERGENCIA","MEDICINA DE FAMILIA E COMUNIDADE","MEDICINA DO TRABALHO","MEDICINA DO TRAFEGO","MEDICINA ESPORTIVA","MEDICINA INTEGRATIVA","MEDICINA INTENSIVA","MEDICINA LEGAL E PERICIA MEDICA","MEDICINA NUCLEAR","MEDICINA PREVENTIVA E SOCIAL","NEFROLOGIA","NEUROCIRURGIA","NEUROLOGIA","NUTRICIONISTA","NUTROLOGO","NUTROLOGO PEDIATRIA","OFTALMOLOGIA","ONCOLOGIA CLINICA","OROFACIAL","ORTOPEDIA E TRAUMATOLOGIA","OTORRINOLARINGOLOGIA","PATOLOGIA","PATOLOGIA CLINICA/MEDICINA LABORATORIAL","PEDIATRIA","PNEUMOLOGIA","PSICOLOGIA","PSIQUIATRIA","RADIOTERAPIA","REPRODUCAO HUMANA","REUMATOLOGISTA","TRICOLOGISTA","TRICOLOGISTA ONCOLOGISTA","UROLOGIA"],
+
+  ativos: ["ABSOLLUE PLENITUDE","ACNULIGHT","ANGEL BE","BIO-SQUALANO","BIOBLANC","BIOP FRANC ALLURE SPORT","BIOP FRANC LA VIE EST BELLE","BIOP FRANC LAVANDA","BIOP FRANC MISS DIOR","BIOP FRANC THE VERT","BLOOME","BT-01","CERASOMOSIDES","CODAGE","FEMINITE","FULL WHITE","GLOW BOOST","GREENBRUSH","GUTBURN","K SOMES - AG","K SOMES - LP","K SOMES - SK","K SOMES- ME","KAWAII KIREI","LUMINECENSE INN","LUMINECENSE OUT","LUXESENSE +","MINIMIZING","MITBURN","MOLECULARE","PDRN PLANT","POWERBURN","PÓ DE ARROZ","QUERCELL","REDBURN K","SANTE BEAUTÉ","SHIGAN","SHOTBURN","SKIN FLORE CODE","SOLEIL SPB 50% MANTEIGA","SOLEIL SPO 20% ÓLEO","SUPERBE D","V2PEP","VEGBURN","VEGELIGHT"],
+
+  materiais: [
+    {n:"FORMULA BLOOME 15 DIAS",t:"AMOSTRA"},{n:"FORMULA FEMINITE 30 DIAS",t:"AMOSTRA"},
+    {n:"FORMULA GUTBURN 15 DIAS",t:"AMOSTRA"},{n:"FORMULA RED BURN 15 DIAS",t:"AMOSTRA"},
+    {n:"FORMULA RED BURN 30 DIAS",t:"AMOSTRA"},{n:"FORMULA SHIGAN - 15 DIAS",t:"AMOSTRA"},
+    {n:"FORMULA SUPERBE 30 DIAS",t:"AMOSTRA"},{n:"FORMULA V2PEP 15 DIAS",t:"AMOSTRA"},
+    {n:"SACHE CODAGE",t:"AMOSTRA"},{n:"SACHE LUMINECENSE",t:"AMOSTRA"},{n:"VEGBURN 15D",t:"AMOSTRA"},
+    {n:"BLOOME BOX",t:"BRINDE"},{n:"BOLSINHA FEMINITE",t:"BRINDE"},{n:"BURN BOX",t:"BRINDE"},
+    {n:"CIRCLE LIFE BOX",t:"BRINDE"},{n:"FEMINITÉ COMPLETA",t:"BRINDE"},{n:"GUTBURN BOX",t:"BRINDE"},
+    {n:"K TIME BOX",t:"BRINDE"},{n:"K-SOMES BOX",t:"BRINDE"},{n:"LUMIBOX LUXO",t:"BRINDE"},
+    {n:"LUMIBOX SIMPLES",t:"BRINDE"},{n:"MASCARA DE CILIOS",t:"BRINDE"},{n:"REDBOX LUXO",t:"BRINDE"},
+    {n:"SACOLA BIODIVERSITE 16 ANOS",t:"BRINDE"},{n:"SACOLA K SOMES PRATA",t:"BRINDE"},
+    {n:"SACOLA POWERBURN",t:"BRINDE"},{n:"SACOLA SHIGAN",t:"BRINDE"},{n:"SOLAPA MIT +VEG",t:"BRINDE"},
+    {n:"SUPERBE BOX",t:"BRINDE"},
+    {n:"FLYER BLOOME",t:"MATERIAL"},{n:"FLYER FEMINITE",t:"MATERIAL"},{n:"FLYER GLOWBOOST",t:"MATERIAL"},
+    {n:"FLYER GUTBURN",t:"MATERIAL"},{n:"FLYER MITBURN",t:"MATERIAL"},{n:"FLYER POWERBURN",t:"MATERIAL"},
+    {n:"FLYER SUPERBE",t:"MATERIAL"},{n:"FLYER V2PEP",t:"MATERIAL"},{n:"RED BOOK",t:"MATERIAL"},
+    {n:"REVISTA BIODIVERSITE 16 ANOS",t:"MATERIAL"},{n:"REVISTA BIOEX 26",t:"MATERIAL"},
+    {n:"REVISTA CATALOGUE REDBURN",t:"MATERIAL"},{n:"REVISTA NUTRACEUTICOS",t:"MATERIAL"},
+    {n:"REVISTA NUTROLOGIA",t:"MATERIAL"},{n:"REVISTA POWERBURN",t:"MATERIAL"}
+  ],
+
+  ufs: ["AC","AL","AM","AP","BA","CE","DF","ES","GO","MA","MG","MS","MT","PA","PB","PE","PI","PR","RJ","RN","RO","RR","RS","SC","SE","SP","TO"],
+  cidades: ["RIO DE JANEIRO (RJ)","SÃO PAULO (SP)","CATANDUVA (SP)","VOTUPORANGA (SP)","MACEIÓ (AL)","SOROCABA (SP)","CURITIBA (PR)","LONDRINA (PR)","BELO HORIZONTE (MG)","CAMPINAS (SP)","NITERÓI (RJ)","SANTOS (SP)","RIBEIRÃO PRETO (SP)","PORTO ALEGRE (RS)","BRASÍLIA (DF)","SALVADOR (BA)","RECIFE (PE)","FORTALEZA (CE)","GOIÂNIA (GO)","FLORIANÓPOLIS (SC)"]
+};
+
+/* ---------- ARMAZENAMENTO (localStorage com queda para memória) ---------- */
+const DB = (function(){
+  let mem = {}, temLS = true;
+  try { localStorage.setItem('__t','1'); localStorage.removeItem('__t'); } catch(e){ temLS = false; }
+  return {
+    disponivel: temLS,
+    ler(k, padrao){
+      try { if(temLS){ const v = localStorage.getItem('sgv.'+k); return v ? JSON.parse(v) : padrao; } } catch(e){}
+      return (k in mem) ? mem[k] : padrao;
+    },
+    gravar(k, v){
+      try { if(temLS){ localStorage.setItem('sgv.'+k, JSON.stringify(v)); return; } } catch(e){}
+      mem[k] = v;
+    },
+    apagar(k){
+      try { if(temLS){ localStorage.removeItem('sgv.'+k); return; } } catch(e){}
+      delete mem[k];
+    }
+  };
+})();
+
+/* ---------- ESTADO ---------- */
+const S = {
+  config:    DB.ler('config', { url: '', token: '' }),
+  usuario:   DB.ler('usuario', null),
+  ultimoErro: '',
+  visitas:   DB.ler('visitas', []),
+  entregas:  DB.ler('entregas', []),
+  clientes:  DB.ler('clientes', []),
+  followups: DB.ler('followups', []),
+  estoque:   DB.ler('estoque', null),
+  online:    navigator.onLine,
+  simularOffline: false,
+  tela: 'home',
+  passo: 0,
+  rascunho: DB.ler('rascunho', null)
+};
+
+/* Catálogos baixados do servidor sobrevivem ao fechar o app — é o que
+   permite abrir sem internet e já ter tudo à mão. */
+(function restaurarCatalogos(){
+  const c = DB.ler('catalogos', null);
+  if(c && c.ativos && c.ativos.length) CAT.ativos = c.ativos;
+  if(c && c.materiais && c.materiais.length) CAT.materiais = c.materiais;
+})();
+
+function salvarTudo(){
+  DB.gravar('visitas', S.visitas);
+  DB.gravar('entregas', S.entregas);
+  DB.gravar('clientes', S.clientes);
+  DB.gravar('followups', S.followups);
+  DB.gravar('estoque', S.estoque);
+}
+function conectado(){ return S.online && !S.simularOffline; }
+
+/* ---------- UTILITÁRIOS ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function hoje(){ const d=new Date(); return d.toISOString().slice(0,10); }
+function dataBR(iso){ if(!iso) return '—'; const p=String(iso).slice(0,10).split('-'); return p.length===3 ? p[2]+'/'+p[1]+'/'+p[0] : iso; }
+function dinheiro(v){ return 'R$ ' + (Number(v)||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function novoId(pre){ return pre + '-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2,6).toUpperCase(); }
+
+/* Chave de deduplicação do cliente: só dígitos, sem zeros à esquerda.
+   Resolve o caso 521762-9 vs 5251762-9 encontrado na planilha atual. */
+function chaveCliente(doc, nome){
+  const d = String(doc||'').replace(/\D/g,'').replace(/^0+/,'');
+  if(d.length >= 4) return 'D'+d;
+  return 'N' + String(nome||'').toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^A-Z0-9]/g,'');
+}
+
+function toast(msg, tipo){
+  const t = $('#toast');
+  t.textContent = msg;
+  t.className = 'on ' + (tipo||'');
+  clearTimeout(t._t);
+  t._t = setTimeout(()=>{ t.className=''; }, 2600);
+}
+
+function abrirModal(html){
+  $('#modal-cx').innerHTML = '<div class="puxador"></div>' + html;
+  $('#modal').classList.add('on');
+}
+function fecharModal(){ $('#modal').classList.remove('on'); }
+document.addEventListener('click', e => { if(e.target.id === 'modal') fecharModal(); });
+
+/* ---------- ESTOQUE INICIAL SIMULADO ---------- */
+function iniciarEstoque(){
+  if(S.estoque) return;
+  const e = {};
+  CAT.materiais.forEach((m,i) => {
+    e[m.n] = m.t==='MATERIAL' ? 40 + (i*7)%60
+           : m.t==='AMOSTRA'  ? 8  + (i*3)%18
+           :                    5  + (i*2)%12;
+  });
+  S.estoque = e;
+  DB.gravar('estoque', e);
+}
+/* ==========================================================================
+   TELAS
+   ========================================================================== */
+
+function render(){
+  if(!S.usuario){ telaLogin(); return; }
+  const u = S.usuario;
+  const naFila = S.visitas.filter(v => v.sync !== 'OK').length;
+
+  let corpo = '';
+  if(S.tela === 'home')      corpo = telaHome();
+  else if(S.tela === 'visita')  corpo = telaVisita();
+  else if(S.tela === 'agenda')  corpo = telaAgenda();
+  else if(S.tela === 'estoque') corpo = telaEstoque();
+  else if(S.tela === 'dados')   corpo = telaDados();
+
+  const titulos = {
+    home:['Olá, '+u.nome, u.perfil+' · meta '+u.meta+' visitas/mês'],
+    visita:['Nova visita','Passo '+(S.passo+1)+' de 6'],
+    agenda:['Agenda e follow up','Compromissos assumidos'],
+    estoque:['Amostras e brindes','Seu saldo em mãos'],
+    dados:['Dados e sincronização','O que vai para a planilha']
+  };
+  const [t1,t2] = titulos[S.tela] || ['SGV',''];
+  const voltar = S.tela === 'visita';
+
+  $('#app').innerHTML =
+    '<div class="topo">' +
+      (voltar ? '<button class="btn-voltar" onclick="sairDaVisita()">‹</button>' : '') +
+      '<h1>'+esc(t1)+'<span class="sub">'+esc(t2)+'</span></h1>' +
+      '<span class="pill-rede '+(conectado()?'on':'off')+'">'+(conectado()?'ONLINE':'OFFLINE')+'</span>' +
+    '</div>' +
+    (S.tela==='visita' ? barraPassos() : '') +
+    '<div class="tela ativa">' + corpo + '</div>' +
+    navegacao(naFila);
+}
+
+function navegacao(naFila){
+  const itens = [
+    ['home','⌂','Início'],
+    ['visita','✎','Visita'],
+    ['agenda','◷','Agenda'],
+    ['estoque','▤','Estoque'],
+    ['dados','⇅','Dados']
+  ];
+  return '<div class="nav">' + itens.map(([id,ic,rot]) =>
+    '<button class="'+(S.tela===id?'on':'')+'" onclick="irPara(\''+id+'\')">' +
+      '<span class="ic">'+ic+'</span><span class="rot">'+rot+'</span>' +
+      (id==='dados' && naFila>0 ? '<span class="bolha">'+naFila+'</span>' : '') +
+    '</button>').join('') + '</div>';
+}
+
+function irPara(t){
+  if(t === 'visita' && S.tela !== 'visita'){
+    if(!R.clienteNome && !S.rascunho) novaVisita();
+    else if(S.rascunho && !R.clienteNome){ R = JSON.parse(JSON.stringify(S.rascunho)); }
+  }
+  S.tela = t;
+  render();
+  window.scrollTo(0,0);
+}
+
+/* ---------- LOGIN ---------- */
+function telaLogin(){
+  $('#app').innerHTML =
+    '<div class="topo"><h1>SGV Biodiversité<span class="sub">Sistema de Gestão de Visitas</span></h1></div>' +
+    '<div class="tela ativa">' +
+      '<div class="cartao" style="text-align:center;padding:26px 16px">' +
+        '<div style="font-size:44px;line-height:1">🌿</div>' +
+        '<h2 style="margin:10px 0 4px;font-size:19px">Identifique-se</h2>' +
+        '<p class="mini" style="margin:0 0 18px">Selecione seu nome para começar. Seus dados ficam salvos neste aparelho.</p>' +
+        '<div style="text-align:left">' +
+          CAT.visitadores.map(v =>
+            '<div class="item" style="cursor:pointer" onclick="entrar(\''+v.id+'\')">' +
+              '<div style="width:38px;height:38px;border-radius:50%;background:var(--verde-cl);color:var(--verde);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex:none">'+esc(v.nome.slice(0,2))+'</div>' +
+              '<div class="txt"><div class="t">'+esc(v.nome)+'</div><div class="s">'+esc(v.perfil)+' · '+esc(v.base)+'</div></div>' +
+              '<span class="selo cinza">meta '+v.meta+'</span>' +
+            '</div>').join('') +
+        '</div>' +
+      '</div>' +
+      '<div class="cartao">' +
+        '<div class="titulo-secao" style="margin-top:0">Ou entre com seu token</div>' +
+        '<input type="text" id="tk" placeholder="cole o token recebido" value="' + esc(S.config.token) + '">' +
+        '<div class="ajuda" style="margin-bottom:10px">Guardado no aparelho — você só digita uma vez, e por isso o app abre offline.</div>' +
+        '<button class="btn" onclick="entrarComToken()">Entrar</button>' +
+      '</div>' +
+      '<div class="aviso azul">Sem token, o app abre em <b>modo demonstração</b>: dá para percorrer todas as telas, mas nada é gravado na planilha.</div>' +
+    '</div>';
+}
+
+function entrar(id){
+  S.usuario = CAT.visitadores.find(v => v.id === id);
+  DB.gravar('usuario', S.usuario);
+  iniciarEstoque();
+  S.tela = 'home';
+  render();
+  toast('Bem-vindo, ' + S.usuario.nome, 'ok');
+}
+
+function entrarComToken(){
+  const tk = (document.getElementById('tk').value || '').trim();
+  if(tk.length < 10){ toast('Token muito curto','err'); return; }
+  setConfig('token', tk);
+  if(!S.config.url){ toast('Configure a URL do servidor primeiro','err'); return; }
+
+  toast('Verificando token…');
+  enviarAoServidor({ acao: 'bootstrap', token: tk }).then(function(r){
+    if(!r.ok){ toast(r.erro || 'Token recusado', 'err'); return; }
+    S.usuario = r.usuario;
+    DB.gravar('usuario', S.usuario);
+    if(r.saldo) S.estoque = r.saldo;
+    if(r.clientes) S.clientes = r.clientes;
+    if(r.followups) S.followups = r.followups.map(function(f){ return Object.assign({sync:'OK'}, f); });
+    if(r.catalogos){
+      if((r.catalogos.produtos||[]).length) CAT.ativos = r.catalogos.produtos;
+      if((r.catalogos.brindes||[]).length){
+        CAT.materiais = r.catalogos.brindes.map(function(b){ return {n:b.nome, t:b.tipo}; });
+      }
+      DB.gravar('catalogos', { ativos: CAT.ativos, materiais: CAT.materiais });
+    }
+    salvarTudo();
+    S.tela = 'home'; render();
+    toast('Bem-vindo, ' + S.usuario.nome, 'ok');
+  }).catch(function(e){
+    toast('Não consegui falar com o servidor: ' + e.message, 'err');
+  });
+}
+
+function sair(){
+  if(!confirm('Sair do app? As visitas já registradas continuam salvas neste aparelho.')) return;
+  S.usuario = null; DB.apagar('usuario'); render();
+}
+
+/* ---------- HOME ---------- */
+function telaHome(){
+  const u = S.usuario;
+  const mes = hoje().slice(0,7);
+  const doMes = S.visitas.filter(v => v.data && v.data.slice(0,7) === mes);
+  const realizadas = doMes.filter(v => v.status === 'REALIZADA').length;
+  const pct = Math.min(100, Math.round(realizadas / u.meta * 100));
+  const naFila = S.visitas.filter(v => v.sync !== 'OK').length;
+  const hj = S.visitas.filter(v => v.data === hoje()).length;
+  const vendas = doMes.reduce((s,v) => s + (Number(v.valorVenda)||0), 0);
+  const comVenda = doMes.filter(v => Number(v.valorVenda) > 0).length;
+
+  const pendentes = S.followups.filter(f => f.status === 'PENDENTE')
+                               .sort((a,b) => (a.data||'').localeCompare(b.data||''));
+  const atrasados = pendentes.filter(f => f.data < hoje());
+  const proximos  = pendentes.filter(f => f.data >= hoje()).slice(0,3);
+
+  return (
+    (naFila > 0 ?
+      '<div class="aviso amarelo"><b>'+naFila+' registro'+(naFila>1?'s':'')+' aguardando envio.</b> ' +
+      (conectado() ? 'Toque para enviar agora.' : 'Serão enviados automaticamente quando a internet voltar.') +
+      (conectado() ? ' <a href="#" onclick="sincronizar();return false" style="color:#78350f;font-weight:700">Enviar</a>' : '') +
+      '</div>' : '') +
+
+    (atrasados.length ?
+      '<div class="aviso vermelho"><b>'+atrasados.length+' follow up atrasado'+(atrasados.length>1?'s':'')+'.</b> ' +
+      '<a href="#" onclick="irPara(\'agenda\');return false" style="color:#7f1d1d;font-weight:700">Ver agenda</a></div>' : '') +
+
+    '<div class="kpis">' +
+      '<div class="kpi destaque"><div class="n">'+realizadas+'<span style="font-size:14px;opacity:.6">/'+u.meta+'</span></div>' +
+        '<div class="r">Visitas no mês</div><div class="barra"><i style="width:'+pct+'%"></i></div></div>' +
+      '<div class="kpi"><div class="n">'+hj+'</div><div class="r">Registradas hoje</div>' +
+        '<div class="mini" style="margin-top:9px">'+dataBR(hoje())+'</div></div>' +
+      '<div class="kpi"><div class="n" style="font-size:19px">'+dinheiro(vendas)+'</div><div class="r">Vendido no mês</div>' +
+        '<div class="mini" style="margin-top:6px">'+comVenda+' visita'+(comVenda!==1?'s':'')+' com venda</div></div>' +
+      '<div class="kpi '+(naFila?'alerta':'')+'"><div class="n">'+naFila+'</div><div class="r">Na fila de envio</div>' +
+        '<div class="mini" style="margin-top:6px">'+(naFila?'Aguardando internet':'Tudo sincronizado')+'</div></div>' +
+    '</div>' +
+
+    '<button class="btn" onclick="novaVisita();irPara(\'visita\')" style="margin-bottom:14px">+ Registrar visita</button>' +
+
+    (S.rascunho ?
+      '<div class="aviso azul"><b>Você tem uma visita começada.</b> ' +
+      esc(S.rascunho.clienteNome || 'sem cliente definido') + ' · ' +
+      '<a href="#" onclick="retomarRascunho();return false" style="color:#1e3a8a;font-weight:700">Continuar</a> · ' +
+      '<a href="#" onclick="descartarRascunho();return false" style="color:#1e3a8a">Descartar</a></div>' : '') +
+
+    (proximos.length ? '<div class="titulo-secao">Próximos follow up</div>' +
+      proximos.map(f =>
+        '<div class="item"><div class="txt"><div class="t">'+esc(f.clienteNome)+'</div>' +
+        '<div class="s">'+dataBR(f.data)+' · '+esc(f.acao||'retornar contato')+'</div></div>' +
+        '<span class="selo '+(f.data===hoje()?'fila':'info')+'">'+(f.data===hoje()?'HOJE':dataBR(f.data).slice(0,5))+'</span></div>').join('') : '') +
+
+    '<div class="titulo-secao">Últimas visitas</div>' +
+    (S.visitas.length === 0 ?
+      '<div class="vazio"><div class="ic">🌱</div><p>Nenhuma visita registrada ainda.<br>Comece pelo botão acima.</p></div>' :
+      S.visitas.slice(0,5).map(cartaoVisita).join('')) +
+
+    '<div class="divisor"></div>' +
+    '<button class="btn neutro" onclick="sair()">Trocar de usuário</button>'
+  );
+}
+
+function cartaoVisita(v){
+  const selo = v.sync === 'OK' ? '<span class="selo ok">enviada</span>'
+             : v.sync === 'ERRO' ? '<span class="selo erro">erro</span>'
+             : '<span class="selo fila">na fila</span>';
+  const qtdE = S.entregas.filter(e => e.idVisita === v.id).reduce((s,e) => s + e.qtd, 0);
+  return '<div class="item">' +
+    '<div class="txt"><div class="t">'+esc(v.clienteNome||'—')+'</div>' +
+    '<div class="s">'+dataBR(v.data)+' · '+esc(v.cidade||'')+
+      (qtdE ? ' · '+qtdE+' item'+(qtdE>1?'s':'') : '') +
+      (Number(v.valorVenda)>0 ? ' · '+dinheiro(v.valorVenda) : '') + '</div></div>' + selo + '</div>';
+}
+/* ==========================================================================
+   WIZARD DE VISITA — 6 passos
+   ========================================================================== */
+
+const PASSOS = ['Contexto','Cliente','Produtos','Amostras e brindes','Resultado','Follow up'];
+let R = {};   // registro em edição
+
+function novaVisita(){
+  R = {
+    id: novoId('V'),
+    data: hoje(),
+    acao: 'VISITA',
+    modalidade: 'PRESENCIAL',
+    tipoCliente: 'MÉDICO',
+    status: 'REALIZADA',
+    clienteNome:'', clienteDoc:'', especialidade:'', cidade:'', uf:'', farmacia:'',
+    telefone:'', email:'',
+    apresentados: [],
+    conhecidos: [],
+    nivelConhece: '',
+    interesse: '',
+    entregas: {},
+    houveVenda: 'NÃO',
+    valorVenda: '',
+    notaMedico: 0,
+    impressaoMedico: '',
+    notaVisitador: 0,
+    impressaoVisitador: '',
+    objecoes: '',
+    precisaFollowup: 'NÃO',
+    followupData: '',
+    followupAcao: '',
+    obs: ''
+  };
+  S.passo = 0;
+}
+
+function salvarRascunho(){ S.rascunho = JSON.parse(JSON.stringify(R)); DB.gravar('rascunho', S.rascunho); }
+function retomarRascunho(){ R = JSON.parse(JSON.stringify(S.rascunho)); S.passo = 1; irPara('visita'); }
+function descartarRascunho(){ S.rascunho = null; DB.apagar('rascunho'); render(); toast('Rascunho descartado'); }
+function sairDaVisita(){
+  if(R.clienteNome || R.clienteDoc){ salvarRascunho(); toast('Salvo como rascunho'); }
+  irPara('home');
+}
+
+function barraPassos(){
+  return '<div class="passos">' +
+    PASSOS.map((_,i) => '<i class="'+(i<S.passo?'feito':i===S.passo?'atual':'')+'"></i>').join('') +
+    '</div><div class="passo-nome">'+PASSOS[S.passo]+'</div>';
+}
+
+function campo(rot, html, ajuda, obrig){
+  return '<label class="campo"><span>'+rot+(obrig?' <em>*</em>':'')+'</span>'+html+
+    (ajuda?'<div class="ajuda">'+ajuda+'</div>':'')+'</label>';
+}
+function chips(lista, valorAtual, fn, ouro){
+  return '<div class="chips">' + lista.map(o =>
+    '<span class="chip '+(valorAtual===o?'on'+(ouro?' ouro':''):'')+'" onclick="'+fn+'(\''+o.replace(/'/g,"\\'")+'\')">'+esc(o)+'</span>'
+  ).join('') + '</div>';
+}
+function selectDe(lista, valor, onchange, vazio){
+  return '<select onchange="'+onchange+'">' +
+    '<option value="">'+(vazio||'Selecione…')+'</option>' +
+    lista.map(o => '<option value="'+esc(o)+'"'+(valor===o?' selected':'')+'>'+esc(o)+'</option>').join('') +
+    '</select>';
+}
+
+function telaVisita(){
+  const p = S.passo;
+  let c = '';
+
+  /* ---------- 1. CONTEXTO ---------- */
+  if(p === 0){
+    c =
+      campo('Data da visita',
+        '<input type="date" value="'+R.data+'" max="'+hoje()+'" onchange="setR(\'data\',this.value)">', '', true) +
+      campo('Tipo de ação', chips(CAT.acao, R.acao, 'setAcao'), '', true) +
+      campo('Modalidade', chips(CAT.modalidade, R.modalidade, 'setModalidade'), '', true) +
+      campo('Tipo de cliente', chips(CAT.tipoCliente, R.tipoCliente, 'setTipoCliente'), '', true) +
+      '<div class="aviso azul">O visitador é preenchido automaticamente: <b>'+esc(S.usuario.nome)+'</b></div>';
+  }
+
+  /* ---------- 2. CLIENTE ---------- */
+  else if(p === 1){
+    const doc = R.tipoCliente === 'FARMÁCIA' || R.tipoCliente === 'CLÍNICA' ? 'CNPJ' : 'CRM';
+    const jaExiste = S.clientes.find(cl => cl.chave === chaveCliente(R.clienteDoc, R.clienteNome));
+    c =
+      '<div class="busca"><input type="text" placeholder="Buscar cliente já cadastrado…" ' +
+        'oninput="buscarCliente(this.value)" id="q-cliente"></div>' +
+      '<div id="res-cliente"></div>' +
+
+      campo(doc, '<input type="text" value="'+esc(R.clienteDoc)+'" placeholder="'+(doc==='CRM'?'ex.: 52844-5':'00.000.000/0001-00')+'" ' +
+        'oninput="setR(\'clienteDoc\',this.value);validarDoc()" id="f-doc">' +
+        '<div class="msg-erro" id="e-doc"></div>',
+        'A chave de identificação usa só os dígitos, sem zeros à esquerda — assim <b>521762-9</b> e <b>0521762-9</b> viram o mesmo cliente.', true) +
+
+      campo('Nome do '+(R.tipoCliente==='FARMÁCIA'?'estabelecimento':'profissional'),
+        '<input type="text" value="'+esc(R.clienteNome)+'" oninput="setR(\'clienteNome\',this.value)" ' +
+        'placeholder="Nome completo" autocapitalize="words">', '', true) +
+
+      (R.tipoCliente !== 'FARMÁCIA' ?
+        campo('Especialidade', selectDe(CAT.especialidades, R.especialidade, 'setR(\'especialidade\',this.value)'), '', true) : '') +
+
+      '<div class="dupla">' +
+        campo('Cidade', '<input type="text" list="l-cid" value="'+esc(R.cidade)+'" oninput="setR(\'cidade\',this.value)" placeholder="Cidade">' +
+          '<datalist id="l-cid">'+CAT.cidades.map(x=>'<option value="'+esc(x)+'">').join('')+'</datalist>', '', true) +
+        campo('UF', selectDe(CAT.ufs, R.uf, 'setR(\'uf\',this.value)', 'UF'), '', true) +
+      '</div>' +
+
+      campo('Farmácia onde manipula / trabalha',
+        '<input type="text" value="'+esc(R.farmacia)+'" oninput="setR(\'farmacia\',this.value)" placeholder="ex.: Dermatus, Avena, Farmacy">',
+        'Campo importante — é por onde o receituário vira venda.') +
+
+      '<div class="dupla">' +
+        campo('Telefone', '<input type="tel" value="'+esc(R.telefone)+'" oninput="setR(\'telefone\',this.value)" placeholder="(00) 00000-0000">') +
+        campo('E-mail', '<input type="email" value="'+esc(R.email)+'" oninput="setR(\'email\',this.value)" placeholder="opcional">') +
+      '</div>' +
+
+      (jaExiste ? '<div class="aviso verde"><b>Cliente já cadastrado.</b> Última visita em ' +
+        dataBR(jaExiste.ultimaVisita) + ' — os dados foram preenchidos.</div>' : '');
+  }
+
+  /* ---------- 3. PRODUTOS ---------- */
+  else if(p === 2){
+    c =
+      '<div class="titulo-secao">Produtos apresentados nesta visita</div>' +
+      '<div class="busca"><input type="text" placeholder="Filtrar ativos…" oninput="filtrarAtivos(this.value,\'ap\')"></div>' +
+      '<div id="lista-ap" class="chips" style="max-height:190px;overflow-y:auto;padding:2px">' + listaAtivos('ap') + '</div>' +
+      '<div class="mini" style="margin-top:6px">'+R.apresentados.length+' selecionado(s)</div>' +
+
+      '<div class="titulo-secao">Quais a Biodiversité o cliente já conhece</div>' +
+      '<div class="busca"><input type="text" placeholder="Filtrar ativos…" oninput="filtrarAtivos(this.value,\'co\')"></div>' +
+      '<div id="lista-co" class="chips" style="max-height:170px;overflow-y:auto;padding:2px">' + listaAtivos('co') + '</div>' +
+      '<div class="mini" style="margin-top:6px">'+R.conhecidos.length+' selecionado(s)</div>' +
+
+      '<div class="divisor"></div>' +
+      campo('Nível de relacionamento com a marca', chips(CAT.conhece, R.nivelConhece, 'setNivel')) +
+      campo('Interesse demonstrado', chips(CAT.interesse, R.interesse, 'setInteresse', true));
+  }
+
+  /* ---------- 4. AMOSTRAS E BRINDES ---------- */
+  else if(p === 3){
+    const grupos = ['AMOSTRA','BRINDE','MATERIAL'];
+    const rot = {AMOSTRA:'Amostras de produto', BRINDE:'Brindes', MATERIAL:'Material de divulgação'};
+    const total = Object.values(R.entregas).reduce((s,q)=>s+q,0);
+    c =
+      '<div class="aviso azul">Cada item entregue vira <b>uma linha</b> na aba ENTREGAS e dá baixa automática no seu saldo.</div>' +
+      grupos.map(g => {
+        const itens = CAT.materiais.filter(m => m.t === g);
+        return '<div class="titulo-secao">'+rot[g]+'</div>' +
+          itens.map(m => {
+            const q = R.entregas[m.n] || 0;
+            const saldo = (S.estoque[m.n] || 0);
+            const semSaldo = saldo <= 0;
+            return '<div class="item" style="'+(q?'border-color:var(--verde3);background:#f6fef9':'')+'">' +
+              '<div class="txt"><div class="t">'+esc(m.n)+'</div>' +
+              '<div class="s">saldo em mãos: '+saldo+(semSaldo?' — sem estoque':'')+'</div></div>' +
+              '<div class="contador">' +
+                '<button onclick="menosItem(\''+m.n.replace(/'/g,"\\'")+'\')" '+(q<=0?'disabled':'')+'>−</button>' +
+                '<span>'+q+'</span>' +
+                '<button onclick="maisItem(\''+m.n.replace(/'/g,"\\'")+'\')" '+(q>=saldo?'disabled':'')+'>+</button>' +
+              '</div></div>';
+          }).join('');
+      }).join('') +
+      '<div class="aviso '+(total?'verde':'amarelo')+'" style="margin-top:14px">' +
+        (total ? '<b>'+total+' item(ns)</b> serão baixados do seu saldo ao salvar.' :
+                 'Nenhum item selecionado. Pode seguir se não entregou nada.') + '</div>';
+  }
+
+  /* ---------- 5. RESULTADO ---------- */
+  else if(p === 4){
+    c =
+      campo('Status da visita', chips(CAT.status, R.status, 'setStatus'), '', true) +
+      campo('Houve venda nesta visita?', chips(['NÃO','SIM','PEDIDO EM ANÁLISE'], R.houveVenda, 'setVenda')) +
+      (R.houveVenda === 'SIM' ?
+        campo('Valor da venda', '<input type="number" step="0.01" min="0" value="'+esc(R.valorVenda)+'" ' +
+          'oninput="setR(\'valorVenda\',this.value)" placeholder="0,00">') : '') +
+
+      '<div class="divisor"></div>' +
+      '<div class="titulo-secao">Como o cliente reagiu</div>' +
+      campo('Receptividade do cliente', escala('notaMedico'), 'De 1 (fechado) a 5 (muito receptivo)') +
+      campo('Impressões do cliente',
+        '<textarea oninput="setR(\'impressaoMedico\',this.value)" placeholder="O que ele falou dos produtos, dúvidas, comparações com concorrentes…">'+esc(R.impressaoMedico)+'</textarea>') +
+      campo('Objeções levantadas',
+        '<textarea oninput="setR(\'objecoes\',this.value)" placeholder="Preço, prazo, já usa outra marca, exige estudo clínico…" style="min-height:60px">'+esc(R.objecoes)+'</textarea>') +
+
+      '<div class="titulo-secao">Sua leitura da visita</div>' +
+      campo('Potencial que você enxerga', escala('notaVisitador'), 'De 1 (baixo) a 5 (alto)') +
+      campo('Suas impressões',
+        '<textarea oninput="setR(\'impressaoVisitador\',this.value)" placeholder="Sua avaliação: vale insistir? o que preparar para a próxima?">'+esc(R.impressaoVisitador)+'</textarea>');
+  }
+
+  /* ---------- 6. FOLLOW UP ---------- */
+  else if(p === 5){
+    c =
+      campo('Precisa de retorno?', chips(['NÃO','SIM'], R.precisaFollowup, 'setFollowup'), '', true) +
+      (R.precisaFollowup === 'SIM' ?
+        campo('Data prevista do retorno',
+          '<input type="date" value="'+R.followupData+'" min="'+hoje()+'" onchange="setR(\'followupData\',this.value)">', '', true) +
+        campo('O que ficou combinado',
+          '<textarea oninput="setR(\'followupAcao\',this.value)" placeholder="Ex.: levar estudo clínico do V2PEP e amostra de 30 dias">'+esc(R.followupAcao)+'</textarea>', '', true) +
+        '<div class="aviso azul">Entra na sua agenda e você recebe o alerta na data.</div>' : '') +
+
+      campo('Observações gerais',
+        '<textarea oninput="setR(\'obs\',this.value)" placeholder="Qualquer coisa relevante que não coube nos campos acima">'+esc(R.obs)+'</textarea>') +
+
+      '<div class="divisor"></div>' + resumoFinal();
+  }
+
+  /* navegação do wizard */
+  const ultimo = p === PASSOS.length - 1;
+  const nav = '<div class="linha-btn" style="margin-top:18px">' +
+    (p > 0 ? '<button class="btn neutro" onclick="passo(-1)">Voltar</button>' : '') +
+    (ultimo ? '<button class="btn" onclick="salvarVisita()">Salvar visita</button>'
+            : '<button class="btn" onclick="passo(1)">Continuar</button>') +
+    '</div>';
+
+  return c + nav;
+}
+
+function escala(campo_){
+  const v = R[campo_];
+  const ic = ['😕','😐','🙂','😊','🤩'];
+  return '<div class="escala">' + ic.map((e,i) =>
+    '<button class="'+(v===i+1?'on':'')+'" onclick="setR(\''+campo_+'\','+(i+1)+');render()">'+e+'</button>'
+  ).join('') + '</div><div class="escala-legenda"><span>baixo</span><span>alto</span></div>';
+}
+
+function listaAtivos(tipo, filtro){
+  const sel = tipo === 'ap' ? R.apresentados : R.conhecidos;
+  const f = (filtro||'').toUpperCase();
+  return CAT.ativos.filter(a => !f || a.includes(f)).map(a =>
+    '<span class="chip '+(sel.includes(a)?'on'+(tipo==='co'?' ouro':''):'')+'" ' +
+    'onclick="alternarAtivo(\''+tipo+'\',\''+a.replace(/'/g,"\\'")+'\')">'+esc(a)+'</span>'
+  ).join('');
+}
+function filtrarAtivos(v, tipo){ document.getElementById('lista-'+tipo).innerHTML = listaAtivos(tipo, v); }
+function alternarAtivo(tipo, a){
+  const arr = tipo === 'ap' ? R.apresentados : R.conhecidos;
+  const i = arr.indexOf(a);
+  if(i >= 0) arr.splice(i,1); else arr.push(a);
+  render();
+}
+
+function resumoFinal(){
+  const itens = Object.entries(R.entregas).filter(([,q]) => q > 0);
+  return '<div class="cartao plano" style="background:#f9fafb">' +
+    '<div class="titulo-secao" style="margin-top:0">Resumo</div>' +
+    '<table class="tabela"><tbody>' +
+    linhaR('Data', dataBR(R.data)) +
+    linhaR('Cliente', R.clienteNome || '—') +
+    linhaR('Documento', R.clienteDoc || '—') +
+    linhaR('Local', (R.cidade||'—') + (R.uf ? ' / '+R.uf : '')) +
+    linhaR('Apresentados', R.apresentados.length ? R.apresentados.join(', ') : 'nenhum') +
+    linhaR('Já conhecia', R.conhecidos.length ? R.conhecidos.join(', ') : 'nenhum') +
+    linhaR('Entregas', itens.length ? itens.map(([n,q]) => q+'× '+n).join('; ') : 'nenhuma') +
+    linhaR('Venda', R.houveVenda === 'SIM' ? dinheiro(R.valorVenda) : R.houveVenda) +
+    linhaR('Follow up', R.precisaFollowup === 'SIM' ? dataBR(R.followupData) : 'não') +
+    '</tbody></table></div>';
+}
+function linhaR(r, v){
+  return '<tr><td style="color:var(--tinta3);white-space:nowrap;vertical-align:top;width:34%">'+r+'</td>' +
+         '<td style="font-weight:600">'+esc(v)+'</td></tr>';
+}
+
+/* setters */
+function setR(k,v){ R[k] = v; if(['acao','tipoCliente','houveVenda','precisaFollowup'].includes(k)) render(); }
+function setAcao(v){ R.acao = v; render(); }
+function setModalidade(v){ R.modalidade = v; render(); }
+function setTipoCliente(v){ R.tipoCliente = v; render(); }
+function setStatus(v){ R.status = v; render(); }
+function setVenda(v){ R.houveVenda = v; if(v!=='SIM') R.valorVenda=''; render(); }
+function setNivel(v){ R.nivelConhece = v; render(); }
+function setInteresse(v){ R.interesse = v; render(); }
+function setFollowup(v){ R.precisaFollowup = v; render(); }
+function maisItem(n){ const s = S.estoque[n]||0; const q = R.entregas[n]||0; if(q < s){ R.entregas[n] = q+1; render(); } }
+function menosItem(n){ const q = R.entregas[n]||0; if(q > 0){ R.entregas[n] = q-1; if(!R.entregas[n]) delete R.entregas[n]; render(); } }
+
+/* busca de cliente */
+function buscarCliente(q){
+  const cx = document.getElementById('res-cliente');
+  if(!q || q.length < 2){ cx.innerHTML = ''; return; }
+  const t = q.toUpperCase();
+  const achados = S.clientes.filter(c =>
+    (c.nome||'').toUpperCase().includes(t) || (c.doc||'').includes(q)).slice(0,6);
+  cx.innerHTML = achados.length ?
+    '<div class="resultados">' + achados.map(c =>
+      '<div onclick="usarCliente(\''+c.chave+'\')"><div class="rt">'+esc(c.nome)+'</div>' +
+      '<div class="rs">'+esc(c.doc||'sem documento')+' · '+esc(c.especialidade||'')+' · '+esc(c.cidade||'')+
+      ' · '+c.visitas+' visita(s)</div></div>').join('') + '</div>'
+    : '<div class="mini" style="padding:8px 2px">Nenhum cliente encontrado. Preencha abaixo para cadastrar.</div>';
+}
+function usarCliente(chave){
+  const c = S.clientes.find(x => x.chave === chave);
+  if(!c) return;
+  Object.assign(R, {clienteNome:c.nome, clienteDoc:c.doc, especialidade:c.especialidade,
+                    cidade:c.cidade, uf:c.uf, farmacia:c.farmacia, telefone:c.telefone, email:c.email});
+  render();
+  toast('Dados de ' + c.nome + ' preenchidos', 'ok');
+}
+
+function validarDoc(){
+  const e = document.getElementById('e-doc');
+  const d = String(R.clienteDoc||'').replace(/\D/g,'');
+  if(R.clienteDoc && d.length < 4){ e.textContent = 'Documento muito curto — confira.'; e.classList.add('on'); }
+  else e.classList.remove('on');
+}
+
+/* navegação entre passos, com validação */
+function passo(dir){
+  if(dir > 0 && !validarPasso()) return;
+  S.passo = Math.max(0, Math.min(PASSOS.length-1, S.passo + dir));
+  salvarRascunho();
+  render();
+  window.scrollTo(0,0);
+}
+function validarPasso(){
+  const p = S.passo;
+  if(p === 0 && !R.data){ toast('Informe a data da visita','err'); return false; }
+  if(p === 1){
+    if(!R.clienteNome.trim()){ toast('Informe o nome do cliente','err'); return false; }
+    if(!R.cidade.trim() || !R.uf){ toast('Informe cidade e UF','err'); return false; }
+    if(R.tipoCliente !== 'FARMÁCIA' && !R.especialidade){ toast('Informe a especialidade','err'); return false; }
+  }
+  if(p === 5 && R.precisaFollowup === 'SIM' && !R.followupData){
+    toast('Informe a data do follow up','err'); return false;
+  }
+  return true;
+}
+/* ==========================================================================
+   SALVAR · SINCRONIZAR · DEMAIS TELAS
+   ========================================================================== */
+
+function salvarVisita(){
+  if(!validarPasso()) return;
+
+  const agora = new Date().toISOString();
+  const chave = chaveCliente(R.clienteDoc, R.clienteNome);
+
+  /* 1. VISITA — uma linha na aba VISITAS */
+  const visita = {
+    id: R.id, chaveCliente: chave, criadoEm: agora,
+    visitador: S.usuario.nome, perfil: S.usuario.perfil,
+    data: R.data, acao: R.acao, modalidade: R.modalidade,
+    tipoCliente: R.tipoCliente, clienteDoc: R.clienteDoc, clienteNome: R.clienteNome,
+    especialidade: R.especialidade, cidade: R.cidade, uf: R.uf, farmacia: R.farmacia,
+    telefone: R.telefone, email: R.email,
+    apresentados: R.apresentados.join(' | '),
+    conhecidos: R.conhecidos.join(' | '),
+    qtdApresentados: R.apresentados.length,
+    nivelConhece: R.nivelConhece, interesse: R.interesse,
+    status: R.status, houveVenda: R.houveVenda, valorVenda: Number(R.valorVenda)||0,
+    notaMedico: R.notaMedico, impressaoMedico: R.impressaoMedico, objecoes: R.objecoes,
+    notaVisitador: R.notaVisitador, impressaoVisitador: R.impressaoVisitador,
+    precisaFollowup: R.precisaFollowup, followupData: R.followupData, followupAcao: R.followupAcao,
+    obs: R.obs,
+    sync: 'FILA'
+  };
+  S.visitas.unshift(visita);
+
+  /* 2. ENTREGAS — uma linha por item (formato longo) */
+  Object.entries(R.entregas).forEach(([nome, qtd]) => {
+    if(qtd <= 0) return;
+    const m = CAT.materiais.find(x => x.n === nome);
+    S.entregas.unshift({
+      id: novoId('E'), idVisita: R.id, data: R.data, visitador: S.usuario.nome,
+      chaveCliente: chave, clienteDoc: R.clienteDoc, clienteNome: R.clienteNome,
+      cidade: R.cidade, uf: R.uf,
+      item: nome, tipo: m ? m.t : 'BRINDE', qtd: qtd,
+      origem: 'VISITA', criadoEm: agora, sync: 'FILA'
+    });
+    S.estoque[nome] = Math.max(0, (S.estoque[nome]||0) - qtd);
+  });
+
+  /* 3. CLIENTES — cadastro único deduplicado */
+  const existente = S.clientes.find(c => c.chave === chave);
+  if(existente){
+    existente.visitas++; existente.ultimaVisita = R.data;
+    if(R.farmacia) existente.farmacia = R.farmacia;
+    if(R.telefone) existente.telefone = R.telefone;
+    if(R.email) existente.email = R.email;
+  } else {
+    S.clientes.push({
+      chave, doc: R.clienteDoc, nome: R.clienteNome, tipo: R.tipoCliente,
+      especialidade: R.especialidade, cidade: R.cidade, uf: R.uf, farmacia: R.farmacia,
+      telefone: R.telefone, email: R.email,
+      visitas: 1, primeiraVisita: R.data, ultimaVisita: R.data, sync: 'FILA'
+    });
+  }
+
+  /* 4. FOLLOWUP */
+  if(R.precisaFollowup === 'SIM' && R.followupData){
+    S.followups.push({
+      id: novoId('F'), idVisita: R.id, chaveCliente: chave,
+      clienteDoc: R.clienteDoc, clienteNome: R.clienteNome,
+      visitador: S.usuario.nome, data: R.followupData, acao: R.followupAcao,
+      cidade: R.cidade, uf: R.uf, prioridade: 'MÉDIA',
+      status: 'PENDENTE', criadoEm: agora, sync: 'FILA'
+    });
+  }
+
+  salvarTudo();
+  S.rascunho = null; DB.apagar('rascunho');
+
+  const qtdItens = Object.values(R.entregas).reduce((s,q)=>s+q,0);
+  novaVisita();
+  S.tela = 'home';
+  render();
+
+  toast(conectado() ? 'Visita salva. Enviando…' : 'Visita salva no aparelho — envio quando houver internet', 'ok');
+  if(conectado()) setTimeout(sincronizar, 700);
+}
+
+/* ==========================================================================
+   SINCRONIZAÇÃO COM O APPS SCRIPT
+   ========================================================================== */
+
+/* Content-Type text/plain de propósito: com application/json o navegador
+   dispara um preflight OPTIONS, que o Apps Script não responde — a chamada
+   morreria antes de sair. */
+function enviarAoServidor(corpo){
+  return fetch(S.config.url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(corpo),
+    redirect: 'follow'
+  }).then(function(r){
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  });
+}
+
+let sincronizando = false;
+
+function sincronizar(){
+  if(sincronizando) return;
+  if(!conectado()){ toast('Sem internet — a fila continua guardada','err'); return; }
+
+  const visitas   = S.visitas.filter(function(v){ return v.sync !== 'OK'; });
+  const entregas  = S.entregas.filter(function(e){ return e.sync !== 'OK'; });
+  const followups = S.followups.filter(function(f){ return f.sync !== 'OK'; });
+  if(!visitas.length && !entregas.length && !followups.length){
+    toast('Nada pendente para enviar'); return;
+  }
+
+  sincronizando = true;
+  render();
+  toast('Enviando ' + visitas.length + ' visita(s)…');
+
+  /* Modo demonstração: sem URL configurada, o app finge o envio para dar
+     para percorrer o fluxo inteiro sem backend no ar. */
+  if(!S.config.url){
+    setTimeout(function(){
+      marcarEnviados(visitas.map(function(v){return v.id;}),
+                     entregas.map(function(e){return e.id;}),
+                     followups.map(function(f){return f.id;}));
+      sincronizando = false; salvarTudo(); render();
+      toast('Simulado: ' + visitas.length + ' registro(s). Configure a URL em Dados.', 'ok');
+    }, 900);
+    return;
+  }
+
+  enviarAoServidor({
+    acao: 'sync', token: S.config.token,
+    visitas: visitas, entregas: entregas, followups: followups
+  }).then(function(r){
+    if(!r.ok) throw new Error(r.erro || 'resposta sem confirmação');
+
+    /* Marca pelos IDs que o servidor confirmou, não pelo que foi mandado.
+       Se um registro não voltar confirmado, ele permanece na fila. */
+    const c = r.confirmados || {};
+    marcarEnviados(c.visitas || [], c.entregas || [], c.followups || []);
+    if(r.saldo) S.estoque = r.saldo;
+
+    S.ultimoErro = '';
+    sincronizando = false; salvarTudo(); render();
+    const g = r.gravados || {};
+    toast((g.visitas || 0) + ' visita(s) gravada(s) na planilha', 'ok');
+
+  }).catch(function(err){
+    /* Falha no envio nunca descarta a fila — só volta a tentar depois. */
+    sincronizando = false;
+    S.ultimoErro = String(err.message || err);
+    render();
+    toast('Falha ao enviar: ' + S.ultimoErro + '. A fila continua guardada.', 'err');
+  });
+}
+
+function marcarEnviados(idsV, idsE, idsF){
+  const cj = function(a){ const o = {}; a.forEach(function(x){ o[x] = 1; }); return o; };
+  const mv = cj(idsV), me = cj(idsE), mf = cj(idsF);
+  const ts = new Date().toISOString();
+  S.visitas.forEach(function(v){ if(mv[v.id]){ v.sync = 'OK'; v.enviadoEm = ts; } });
+  S.entregas.forEach(function(e){ if(me[e.id]) e.sync = 'OK'; });
+  S.followups.forEach(function(f){ if(mf[f.id]) f.sync = 'OK'; });
+}
+
+/* Baixa catálogos, clientes e saldo do servidor. Roda no login e sob demanda. */
+function baixarCatalogos(){
+  if(!S.config.url || !S.config.token){ toast('Configure a URL e o token em Dados','err'); return; }
+  if(!conectado()){ toast('Sem internet','err'); return; }
+  toast('Baixando catálogos…');
+
+  enviarAoServidor({ acao: 'bootstrap', token: S.config.token }).then(function(r){
+    if(!r.ok) throw new Error(r.erro || 'falha no bootstrap');
+
+    if(r.catalogos){
+      if((r.catalogos.produtos || []).length) CAT.ativos = r.catalogos.produtos;
+      if((r.catalogos.brindes || []).length){
+        CAT.materiais = r.catalogos.brindes.map(function(b){ return { n: b.nome, t: b.tipo }; });
+      }
+      ['especialidades','acao','modalidade','tipoCliente','status','conhece','interesse','cidades']
+        .forEach(function(k){
+          if((r.catalogos[k] || []).length) CAT[k] = r.catalogos[k];
+        });
+      DB.gravar('catalogos', { ativos: CAT.ativos, materiais: CAT.materiais });
+    }
+    if(r.usuario){ S.usuario = r.usuario; DB.gravar('usuario', S.usuario); }
+    if(r.saldo) S.estoque = r.saldo;
+    if(r.clientes) S.clientes = mesclarClientes(S.clientes, r.clientes);
+    if(r.followups) S.followups = mesclarFollowups(S.followups, r.followups);
+
+    salvarTudo(); render();
+    toast('Catálogos atualizados', 'ok');
+
+  }).catch(function(err){
+    toast('Falha ao baixar: ' + err.message, 'err');
+  });
+}
+
+/* Na mesclagem o servidor vence, mas o que ainda está na fila local é
+   preservado — senão uma visita não enviada perderia o cliente dela. */
+function mesclarClientes(locais, doServidor){
+  const mapa = {};
+  locais.forEach(function(c){ if(c.sync !== 'OK') mapa[c.chave] = c; });
+  doServidor.forEach(function(c){ mapa[c.chave] = c; });
+  return Object.keys(mapa).map(function(k){ return mapa[k]; });
+}
+function mesclarFollowups(locais, doServidor){
+  const mapa = {};
+  locais.forEach(function(f){ if(f.sync !== 'OK') mapa[f.id] = f; });
+  doServidor.forEach(function(f){ mapa[f.id] = Object.assign({ sync: 'OK' }, f); });
+  return Object.keys(mapa).map(function(k){ return mapa[k]; });
+}
+
+/* ---------- AGENDA ---------- */
+function telaAgenda(){
+  const pend = S.followups.filter(f => f.status === 'PENDENTE').sort((a,b)=>(a.data||'').localeCompare(b.data||''));
+  const feitos = S.followups.filter(f => f.status !== 'PENDENTE');
+  const atras = pend.filter(f => f.data < hoje());
+  const hj    = pend.filter(f => f.data === hoje());
+  const fut   = pend.filter(f => f.data > hoje());
+
+  const bloco = (titulo, lista, selo) => !lista.length ? '' :
+    '<div class="titulo-secao">'+titulo+' ('+lista.length+')</div>' +
+    lista.map(f =>
+      '<div class="item"><div class="txt"><div class="t">'+esc(f.clienteNome)+'</div>' +
+      '<div class="s">'+dataBR(f.data)+' · '+esc(f.cidade||'')+'</div>' +
+      (f.acao ? '<div class="mini" style="margin-top:5px">'+esc(f.acao)+'</div>' : '') +
+      '<div style="margin-top:8px"><button class="btn peq sec" onclick="concluirFollowup(\''+f.id+'\')">Concluir</button></div>' +
+      '</div><span class="selo '+selo+'">'+dataBR(f.data).slice(0,5)+'</span></div>').join('');
+
+  return (
+    (pend.length === 0 && feitos.length === 0 ?
+      '<div class="vazio"><div class="ic">◷</div><p>Nenhum follow up agendado.<br>Eles são criados no passo 6 da visita.</p></div>' : '') +
+    bloco('Atrasados', atras, 'erro') +
+    bloco('Hoje', hj, 'fila') +
+    bloco('Próximos', fut, 'info') +
+    (feitos.length ? '<div class="titulo-secao">Concluídos</div>' +
+      feitos.map(f => '<div class="item" style="opacity:.6"><div class="txt">' +
+      '<div class="t">'+esc(f.clienteNome)+'</div><div class="s">'+dataBR(f.data)+'</div></div>' +
+      '<span class="selo ok">feito</span></div>').join('') : '')
+  );
+}
+function concluirFollowup(id){
+  const f = S.followups.find(x => x.id === id);
+  if(!f) return;
+  f.status = 'CONCLUIDO'; f.concluidoEm = new Date().toISOString(); f.sync = 'FILA';
+  salvarTudo(); render(); toast('Follow up concluído','ok');
+  if(S.config.url && conectado()){
+    enviarAoServidor({ acao:'concluir_followup', token:S.config.token,
+                       id:f.id, status:'CONCLUIDO', resultado:f.resultado || '' })
+      .then(function(r){ if(r.ok){ f.sync = 'OK'; salvarTudo(); } })
+      .catch(function(){ /* fica na fila; a próxima sincronização resolve */ });
+  }
+}
+
+/* ---------- ESTOQUE ---------- */
+function telaEstoque(){
+  const grupos = ['AMOSTRA','BRINDE','MATERIAL'];
+  const rot = {AMOSTRA:'Amostras de produto', BRINDE:'Brindes', MATERIAL:'Material de divulgação'};
+  const entregueTotal = S.entregas.reduce((s,e)=>s+e.qtd,0);
+  const emMaos = Object.values(S.estoque||{}).reduce((s,q)=>s+q,0);
+
+  return '<div class="kpis">' +
+      '<div class="kpi destaque"><div class="n">'+emMaos+'</div><div class="r">Itens em mãos</div></div>' +
+      '<div class="kpi"><div class="n">'+entregueTotal+'</div><div class="r">Já entregues</div></div>' +
+    '</div>' +
+    '<div class="aviso azul">Saldo = entradas por NF menos entregas em visitas e eventos. Na planilha antiga alguns saldos estavam negativos porque as entradas não eram lançadas.</div>' +
+    grupos.map(g =>
+      '<div class="titulo-secao">'+rot[g]+'</div>' +
+      CAT.materiais.filter(m => m.t===g).map(m => {
+        const s = S.estoque[m.n]||0;
+        const ent = S.entregas.filter(e => e.item===m.n).reduce((a,e)=>a+e.qtd,0);
+        return '<div class="item"><div class="txt"><div class="t">'+esc(m.n)+'</div>' +
+          '<div class="s">'+(ent?ent+' entregue(s)':'nada entregue ainda')+'</div></div>' +
+          '<span class="selo '+(s===0?'erro':s<5?'fila':'ok')+'">'+s+'</span></div>';
+      }).join('')
+    ).join('');
+}
+
+/* ---------- DADOS / SINCRONIZAÇÃO ---------- */
+function telaDados(){
+  const naFila = S.visitas.filter(v => v.sync !== 'OK').length;
+  return (
+    '<div class="cartao">' +
+      '<div class="titulo-secao" style="margin-top:0">Ligação com a planilha</div>' +
+      campo('URL do aplicativo da Web (Apps Script)',
+        '<input type="text" value="' + esc(S.config.url) + '" placeholder="https://script.google.com/macros/s/.../exec" ' +
+        'oninput="setConfig(\'url\',this.value)">',
+        'Copie de: Implantar → Nova implantação → Aplicativo da Web.') +
+      campo('Seu token',
+        '<input type="text" value="' + esc(S.config.token) + '" placeholder="cole aqui o token recebido" ' +
+        'oninput="setConfig(\'token\',this.value)">',
+        'Está na aba VISITADORES da base central.') +
+      '<div class="linha-btn">' +
+        '<button class="btn sec" onclick="testarConexao()">Testar conexão</button>' +
+        '<button class="btn" onclick="baixarCatalogos()">Baixar catálogos</button>' +
+      '</div>' +
+      (S.config.url ? '' :
+        '<div class="aviso amarelo" style="margin-top:10px"><b>Sem URL configurada.</b> ' +
+        'O app está em modo demonstração: o envio é simulado e nada chega à planilha.</div>') +
+      (S.ultimoErro ?
+        '<div class="aviso vermelho" style="margin-top:10px"><b>Último erro de envio:</b> ' +
+        esc(S.ultimoErro) + '</div>' : '') +
+    '</div>' +
+
+    '<div class="cartao">' +
+      '<div class="titulo-secao" style="margin-top:0">Conexão</div>' +
+      '<div class="item" style="box-shadow:none;margin-bottom:10px">' +
+        '<div class="txt"><div class="t">'+(conectado()?'Conectado':'Sem conexão')+'</div>' +
+        '<div class="s">'+(DB.disponivel?'Armazenamento local ativo':'Armazenamento em memória (modo prévia)')+'</div></div>' +
+        '<span class="selo '+(conectado()?'ok':'fila')+'">'+(conectado()?'ONLINE':'OFFLINE')+'</span></div>' +
+      '<button class="btn '+(naFila?'':'neutro')+'" onclick="sincronizar()" '+(naFila?'':'disabled')+'>' +
+        (naFila ? 'Enviar '+naFila+' registro(s) agora' : 'Tudo sincronizado') + '</button>' +
+      '<div class="linha-btn">' +
+        '<button class="btn neutro" onclick="alternarOffline()">' +
+          (S.simularOffline ? 'Voltar a ficar online' : 'Simular perda de sinal') + '</button>' +
+      '</div>' +
+      '<div class="ajuda" style="margin-top:8px">Use o teste acima para ver o comportamento offline: registre uma visita sem sinal e depois volte a conectar.</div>' +
+    '</div>' +
+
+    '<div class="titulo-secao">O que vai para a planilha</div>' +
+    '<div class="cartao plano">' +
+      tabelaResumo('VISITAS', S.visitas.length, 'uma linha por visita, 35 colunas') +
+      tabelaResumo('ENTREGAS', S.entregas.length, 'uma linha por item entregue') +
+      tabelaResumo('CLIENTES', S.clientes.length, 'cadastro único, deduplicado pelo CRM') +
+      tabelaResumo('FOLLOWUP', S.followups.length, 'compromissos com data e status') +
+    '</div>' +
+
+    (S.visitas.length ?
+      '<div class="titulo-secao">Prévia da aba ENTREGAS</div>' +
+      '<div class="rolagem"><table class="tabela"><thead><tr>' +
+      '<th>DATA</th><th>VISITADOR</th><th>CLIENTE</th><th>ITEM</th><th>TIPO</th><th>QTD</th></tr></thead><tbody>' +
+      S.entregas.slice(0,12).map(e => '<tr><td>'+dataBR(e.data)+'</td><td>'+esc(e.visitador)+'</td>' +
+        '<td>'+esc(e.clienteNome)+'</td><td>'+esc(e.item)+'</td><td>'+esc(e.tipo)+'</td><td>'+e.qtd+'</td></tr>').join('') +
+      (S.entregas.length===0 ? '<tr><td colspan="6" style="text-align:center;color:var(--tinta4)">nenhuma entrega ainda</td></tr>':'') +
+      '</tbody></table></div>' : '') +
+
+    '<div class="titulo-secao">Todas as visitas</div>' +
+    (S.visitas.length ? S.visitas.map(cartaoVisita).join('') :
+      '<div class="vazio"><div class="ic">⇅</div><p>Nada registrado ainda.</p></div>') +
+
+    '<div class="divisor"></div>' +
+    '<div class="linha-btn">' +
+      '<button class="btn neutro" onclick="baixarCSV()">Baixar CSV</button>' +
+      '<button class="btn perigo" onclick="limparTudo()">Limpar dados</button>' +
+    '</div>' +
+    '<div class="ajuda" style="margin-top:8px">O CSV serve para conferência. No app real os dados vão direto para a planilha.</div>'
+  );
+}
+function tabelaResumo(aba, n, desc){
+  return '<div class="item" style="box-shadow:none"><div class="txt"><div class="t">'+aba+'</div>' +
+    '<div class="s">'+desc+'</div></div><span class="selo '+(n?'ok':'cinza')+'">'+n+'</span></div>';
+}
+
+function setConfig(k, v){
+  S.config[k] = v.trim();
+  DB.gravar('config', S.config);
+}
+
+function testarConexao(){
+  if(!S.config.url){ toast('Informe a URL primeiro','err'); return; }
+  if(!conectado()){ toast('Sem internet','err'); return; }
+  toast('Testando…');
+  enviarAoServidor({ acao: 'ping' })
+    .then(function(r){ toast(r.ok ? 'Conexão certa — servidor respondeu' : 'Resposta inesperada',
+                             r.ok ? 'ok' : 'err'); })
+    .catch(function(e){ toast('Não respondeu: ' + e.message, 'err'); });
+}
+
+function alternarOffline(){
+  S.simularOffline = !S.simularOffline;
+  render();
+  toast(S.simularOffline ? 'Modo offline simulado — registre uma visita para testar' : 'De volta online');
+  if(!S.simularOffline && S.visitas.some(v=>v.sync!=='OK')) setTimeout(sincronizar, 600);
+}
+
+function baixarCSV(){
+  const cab = ['ID_VISITA','DATA','VISITADOR','ACAO','MODALIDADE','TIPO_CLIENTE','DOC','CLIENTE',
+    'ESPECIALIDADE','CIDADE','UF','FARMACIA','APRESENTADOS','JA_CONHECIA','NIVEL','INTERESSE',
+    'STATUS','VENDA','VALOR','NOTA_CLIENTE','IMPRESSAO_CLIENTE','OBJECOES','NOTA_VISITADOR',
+    'IMPRESSAO_VISITADOR','FOLLOWUP','FOLLOWUP_DATA','FOLLOWUP_ACAO','OBS'];
+  const linhas = S.visitas.map(v => [v.id,v.data,v.visitador,v.acao,v.modalidade,v.tipoCliente,
+    v.clienteDoc,v.clienteNome,v.especialidade,v.cidade,v.uf,v.farmacia,v.apresentados,v.conhecidos,
+    v.nivelConhece,v.interesse,v.status,v.houveVenda,v.valorVenda,v.notaMedico,v.impressaoMedico,
+    v.objecoes,v.notaVisitador,v.impressaoVisitador,v.precisaFollowup,v.followupData,v.followupAcao,v.obs]);
+  const csv = [cab].concat(linhas)
+    .map(l => l.map(c => '"' + String(c==null?'':c).replace(/"/g,'""') + '"').join(';')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8'}));
+  a.download = 'SGV_visitas.csv';
+  a.click();
+  toast('CSV gerado','ok');
+}
+
+function limparTudo(){
+  if(!confirm('Apagar todas as visitas, entregas e clientes deste aparelho?')) return;
+  S.visitas=[]; S.entregas=[]; S.clientes=[]; S.followups=[]; S.estoque=null; S.rascunho=null;
+  DB.apagar('rascunho'); iniciarEstoque(); salvarTudo(); render(); toast('Dados apagados');
+}
+
+/* ---------- SERVICE WORKER ----------
+   É o que permite ABRIR o app sem internet. Sem ele, o visitador sem sinal
+   veria a tela de erro do navegador e não chegaria ao formulário.
+   Falha no registro não impede o app de funcionar com conexão. */
+if('serviceWorker' in navigator){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('./sw.js').catch(function(){ /* silencioso */ });
+  });
+}
+
+/* ---------- EVENTOS DE REDE ---------- */
+window.addEventListener('online',  () => { S.online = true;  render(); if(S.visitas.some(v=>v.sync!=='OK')) sincronizar(); });
+window.addEventListener('offline', () => { S.online = false; render(); toast('Sem internet — os registros ficam guardados'); });
+
+/* ---------- INÍCIO ---------- */
+iniciarEstoque();
+novaVisita();
+if(S.rascunho) R = JSON.parse(JSON.stringify(S.rascunho));
+render();
+
+/* Ao abrir o app: se houver internet e fila pendente, envia sozinho.
+   É o que garante que uma visita registrada sem sinal não fique esquecida. */
+if(S.usuario && conectado() && S.visitas.some(v => v.sync !== 'OK')){
+  setTimeout(sincronizar, 900);
+}
+</script>
+</body></html>
