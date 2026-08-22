@@ -343,7 +343,60 @@ const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<'
 
 function hoje(){ const d=new Date(); return d.toISOString().slice(0,10); }
 function dataBR(iso){ if(!iso) return '—'; const p=String(iso).slice(0,10).split('-'); return p.length===3 ? p[2]+'/'+p[1]+'/'+p[0] : iso; }
-function dinheiro(v){ return 'R$ ' + (Number(v)||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function dinheiro(v){
+  return 'R$ ' + paraNumeroApp(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+/* ---------- MOEDA ----------
+   Os dígitos digitados são REAIS INTEIROS: "5000" vira "5.000,00".
+   Centavos entram com vírgula: "5000,50" vira "5.000,50".
+   Mesma leitura do lado do servidor, para os dois não discordarem. */
+
+/** Texto do campo → número. Aceita "5.000,00", "5000,5", "5000" e 5000. */
+function paraNumeroApp(v){
+  if(typeof v === 'number') return isNaN(v) ? 0 : v;
+  let t = String(v == null ? '' : v).replace(/[^\d,.-]/g, '').trim();
+  if(!t) return 0;
+
+  const temVirgula = t.indexOf(',') >= 0;
+  const temPonto   = t.indexOf('.') >= 0;
+
+  if(temVirgula && temPonto){
+    t = (t.lastIndexOf(',') > t.lastIndexOf('.'))
+      ? t.replace(/\./g,'').replace(',', '.')     // 5.000,50
+      : t.replace(/,/g,'');                       // 5,000.50
+  } else if(temVirgula){
+    t = t.replace(',', '.');
+  } else if(temPonto && /^-?\d{1,3}(\.\d{3})+$/.test(t)){
+    t = t.replace(/\./g,'');                      // 5.000 é milhar, não decimal
+  }
+  const n = parseFloat(t);
+  return isNaN(n) ? 0 : n;
+}
+
+/** Formata enquanto digita: separa milhar e deixa a vírgula em paz. */
+function moedaDigitando(texto){
+  let t = String(texto == null ? '' : texto).replace(/[^\d,]/g, '');
+  if(!t) return '';
+
+  // só a primeira vírgula vale
+  const i = t.indexOf(',');
+  let inteiro = i < 0 ? t : t.slice(0, i);
+  let dec     = i < 0 ? null : t.slice(i + 1).replace(/,/g, '').slice(0, 2);
+
+  inteiro = inteiro.replace(/^0+(?=\d)/, '');
+  const comMilhar = inteiro ? Number(inteiro).toLocaleString('pt-BR') : '';
+
+  if(dec === null) return comMilhar;
+  return (comMilhar || '0') + ',' + dec;
+}
+
+/** Ao sair do campo completa os centavos: "5.000" vira "5.000,00". */
+function moedaCompleta(texto){
+  const n = paraNumeroApp(texto);
+  if(!n && !String(texto || '').trim()) return '';
+  return n.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
 function novoId(pre){ return pre + '-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).slice(2,6).toUpperCase(); }
 
 /* Chave de deduplicação do cliente: só dígitos, sem zeros à esquerda.
@@ -602,7 +655,7 @@ function telaHome(){
         '<div class="s">'+dataBR(f.data)+' · '+esc(f.acao||'retornar contato')+'</div></div>' +
         '<span class="selo '+(f.data===hoje()?'fila':'info')+'">'+(f.data===hoje()?'HOJE':dataBR(f.data).slice(0,5))+'</span></div>').join('') : '') +
 
-    '<div class="titulo-secao">Últimas visitas — toque em Corrigir para ajustar</div>' +
+    '<div class="titulo-secao">Últimas visitas — toque em Editar para ajustar</div>' +
     (S.visitas.length === 0 ?
       '<div class="vazio"><div class="ic">🌱</div><p>Nenhuma visita registrada ainda.<br>Comece pelo botão acima.</p></div>' :
       S.visitas.slice(0,5).map(function(v){ return cartaoVisita(v, true); }).join('')) +
@@ -618,7 +671,7 @@ function telaHome(){
 
 function cartaoVisita(v, permitirEditar){
   const selo = v.sync === 'OK'      ? '<span class="selo ok">enviada</span>'
-             : v.sync === 'EDITADO' ? '<span class="selo info">corrigida</span>'
+             : v.sync === 'EDITADO' ? '<span class="selo info">editada</span>'
              : v.sync === 'ERRO'    ? '<span class="selo erro">erro</span>'
              :                        '<span class="selo fila">na fila</span>';
   const qtdE = S.entregas.filter(function(e){ return e.idVisita === v.id; })
@@ -630,7 +683,7 @@ function cartaoVisita(v, permitirEditar){
       (Number(v.valorVenda) > 0 ? ' · ' + dinheiro(v.valorVenda) : '') + '</div>' +
     (permitirEditar ?
       '<div style="margin-top:8px"><button class="btn peq sec" ' +
-      'onclick="abrirParaEditar(\'' + v.id + '\')">Corrigir</button></div>' : '') +
+      'onclick="abrirParaEditar(\'' + v.id + '\')">Editar</button></div>' : '') +
     '</div>' + selo + '</div>';
 }
 /* ==========================================================================
@@ -702,7 +755,7 @@ function abrirParaEditar(id){
     nivelConhece: v.nivelConhece || '', interesse: v.interesse || '',
     entregas: entregas,
     houveVenda: v.houveVenda || 'NÃO',
-    valorVenda: v.valorVenda ? String(v.valorVenda) : '',
+    valorVenda: v.valorVenda ? moedaCompleta(String(v.valorVenda)) : '',
     notaMedico: Number(v.notaMedico) || 0, impressaoMedico: v.impressaoMedico || '',
     objecoes: v.objecoes || '',
     notaVisitador: Number(v.notaVisitador) || 0, impressaoVisitador: v.impressaoVisitador || '',
@@ -781,14 +834,14 @@ function ordenarVisitas(){
 }
 
 function salvarRascunho(){
-  if(R.editando) return;   // correção não vira rascunho
+  if(R.editando) return;   // edição não vira rascunho
   S.rascunho = JSON.parse(JSON.stringify(R));
   DB.gravar('rascunho', S.rascunho);
 }
 function retomarRascunho(){ R = JSON.parse(JSON.stringify(S.rascunho)); S.passo = 1; irPara('visita'); }
 function descartarRascunho(){ S.rascunho = null; DB.apagar('rascunho'); render(); toast('Rascunho descartado'); }
 function sairDaVisita(){
-  if(R.editando){ toast('Correção descartada'); novaVisita(); irPara('home'); return; }
+  if(R.editando){ toast('Edição descartada'); novaVisita(); irPara('home'); return; }
   if(R.clienteNome || R.clienteDoc){ salvarRascunho(); toast('Salvo como rascunho'); }
   irPara('home');
 }
@@ -796,7 +849,7 @@ function sairDaVisita(){
 function barraPassos(){
   return (R.editando ?
     '<div style="background:var(--info-cl);color:var(--info);text-align:center;' +
-    'padding:6px 10px;font-size:12px;font-weight:700">CORRIGINDO UMA VISITA JÁ ENVIADA</div>' : '') +
+    'padding:6px 10px;font-size:12px;font-weight:700">EDITANDO UMA VISITA JÁ ENVIADA</div>' : '') +
     '<div class="passos">' +
     PASSOS.map((_,i) => '<i class="'+(i<S.passo?'feito':i===S.passo?'atual':'')+'"></i>').join('') +
     '</div><div class="passo-nome">'+PASSOS[S.passo]+'</div>';
@@ -912,8 +965,15 @@ function telaVisita(){
       campo('Status da visita', chips(CAT.status, R.status, 'setStatus'), '', true) +
       campo('Houve venda nesta visita?', chips(['NÃO','SIM','PEDIDO EM ANÁLISE'], R.houveVenda, 'setVenda')) +
       (R.houveVenda === 'SIM' ?
-        campo('Valor da venda', '<input type="number" step="0.01" min="0" value="'+esc(R.valorVenda)+'" ' +
-          'oninput="setR(\'valorVenda\',this.value)" placeholder="0,00">') : '') +
+        campo('Valor da venda',
+          '<div style="position:relative">' +
+            '<span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);' +
+            'color:var(--tinta3);font-size:17px;pointer-events:none">R$</span>' +
+            '<input type="text" inputmode="decimal" id="f-valor" ' +
+            'value="' + esc(R.valorVenda) + '" placeholder="0,00" style="padding-left:42px" ' +
+            'oninput="digitarValor(this)" onblur="fecharValor(this)">' +
+          '</div>',
+          'Digite só os números: <b>5000</b> vira <b>5.000,00</b>. Para centavos, use vírgula.') : '') +
 
       '<div class="divisor"></div>' +
       '<div class="titulo-secao">Como o cliente reagiu</div>' +
@@ -951,7 +1011,7 @@ function telaVisita(){
   const nav = '<div class="linha-btn" style="margin-top:18px">' +
     (p > 0 ? '<button class="btn neutro" onclick="passo(-1)">Voltar</button>' : '') +
     (ultimo ? '<button class="btn" onclick="salvarVisita()">' +
-                (R.editando ? 'Salvar correção' : 'Salvar visita') + '</button>'
+                (R.editando ? 'Salvar alterações' : 'Salvar visita') + '</button>'
             : '<button class="btn" onclick="passo(1)">Continuar</button>') +
     '</div>';
 
@@ -1058,13 +1118,29 @@ function linhaR(r, v){
          '<td style="font-weight:600">'+esc(v)+'</td></tr>';
 }
 
+/* Máscara do valor. O cursor vai para o fim a cada tecla — num campo de
+   moeda a digitação é sempre da esquerda para a direita, e isso evita o
+   cursor pular de lugar quando os pontos de milhar são inseridos. */
+function digitarValor(el){
+  const formatado = moedaDigitando(el.value);
+  el.value = formatado;
+  R.valorVenda = formatado;
+  const fim = el.value.length;
+  try { el.setSelectionRange(fim, fim); } catch(e) {}
+}
+
+function fecharValor(el){
+  el.value = moedaCompleta(el.value);
+  R.valorVenda = el.value;
+}
+
 /* setters */
 function setR(k,v){ R[k] = v; if(['acao','tipoCliente','houveVenda','precisaFollowup'].includes(k)) render(); }
 function setAcao(v){ R.acao = v; render(); }
 function setModalidade(v){ R.modalidade = v; render(); }
 function setTipoCliente(v){ R.tipoCliente = v; render(); }
 function setStatus(v){ R.status = v; render(); }
-function setVenda(v){ R.houveVenda = v; if(v!=='SIM') R.valorVenda=''; render(); }
+function setVenda(v){ R.houveVenda = v; if(v !== 'SIM') R.valorVenda = ''; render(); }
 function setNivel(v){ R.nivelConhece = v; render(); }
 function setInteresse(v){ R.interesse = v; render(); }
 function setFollowup(v){ R.precisaFollowup = v; render(); }
@@ -1145,7 +1221,7 @@ function salvarVisita(){
     conhecidos: R.conhecidos.join(' | '),
     qtdApresentados: R.apresentados.length,
     nivelConhece: R.nivelConhece, interesse: R.interesse,
-    status: R.status, houveVenda: R.houveVenda, valorVenda: Number(R.valorVenda)||0,
+    status: R.status, houveVenda: R.houveVenda, valorVenda: paraNumeroApp(R.valorVenda),
     notaMedico: R.notaMedico, impressaoMedico: R.impressaoMedico, objecoes: R.objecoes,
     notaVisitador: R.notaVisitador, impressaoVisitador: R.impressaoVisitador,
     precisaFollowup: R.precisaFollowup, followupData: R.followupData, followupAcao: R.followupAcao,
@@ -1208,7 +1284,7 @@ function salvarVisita(){
 }
 
 /* ==========================================================================
-   CORREÇÃO DE VISITA JÁ ENVIADA
+   EDIÇÃO DE VISITA JÁ ENVIADA
    ========================================================================== */
 
 function salvarCorrecao(){
@@ -1229,7 +1305,7 @@ function salvarCorrecao(){
     conhecidos: R.conhecidos.join(' | '),
     qtdApresentados: R.apresentados.length,
     nivelConhece: R.nivelConhece, interesse: R.interesse,
-    status: R.status, houveVenda: R.houveVenda, valorVenda: Number(R.valorVenda) || 0,
+    status: R.status, houveVenda: R.houveVenda, valorVenda: paraNumeroApp(R.valorVenda),
     notaMedico: R.notaMedico, impressaoMedico: R.impressaoMedico, objecoes: R.objecoes,
     notaVisitador: R.notaVisitador, impressaoVisitador: R.impressaoVisitador,
     precisaFollowup: R.precisaFollowup, followupData: R.followupData,
@@ -1279,8 +1355,8 @@ function salvarCorrecao(){
   S.tela = 'home';
   render();
 
-  toast(conectado() && !S.demo ? 'Correção salva. Enviando…'
-                               : 'Correção salva no aparelho — envio quando houver internet', 'ok');
+  toast(conectado() && !S.demo ? 'Alterações salvas. Enviando…'
+                               : 'Alterações salvas no aparelho — envio quando houver internet', 'ok');
   if(conectado() && !S.demo) setTimeout(sincronizar, 700);
 }
 
@@ -1405,7 +1481,7 @@ function enviarEdicoes(editadas){
 
   return proxima().then(function(){
     const pend = S.visitas.filter(function(v){ return v.sync !== 'OK'; }).length;
-    return (gravadas ? gravadas + ' visita(s) corrigida(s). ' : '') +
+    return (gravadas ? gravadas + ' visita(s) atualizada(s). ' : '') +
            (pend ? pend + ' ainda na fila' : 'Tudo gravado na planilha');
   });
 }
