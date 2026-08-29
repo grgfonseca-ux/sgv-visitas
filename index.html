@@ -1892,16 +1892,32 @@ if('serviceWorker' in navigator){
 window.addEventListener('online',  () => { S.online = true;  render(); if(S.visitas.some(v=>v.sync!=='OK')) sincronizar(); });
 window.addEventListener('offline', () => { S.online = false; render(); toast('Sem internet — os registros ficam guardados'); });
 
-/* ---------- INÍCIO ---------- */
-iniciarEstoque();
-novaVisita();
-if(S.rascunho) R = JSON.parse(JSON.stringify(S.rascunho));
-render();
+/* ---------- INÍCIO ----------
+   A partida fica DEPOIS de todo o programa ter sido lido.
 
-/* Ao abrir o app: se houver internet e fila pendente, envia sozinho.
-   É o que garante que uma visita registrada sem sinal não fique esquecida. */
-if(S.usuario && conectado() && S.visitas.some(v => v.sync !== 'OK')){
-  setTimeout(sincronizar, 900);
+   Antes ela rodava aqui mesmo, no meio do arquivo, e quebrava: o painel do
+   gestor é definido mais adiante com `const PN`, e const não existe antes da
+   linha que o cria. Um gestor que já tivesse entrado antes abria o aplicativo
+   e recebia tela em branco — a primeira coisa que o render() fazia era ler PN.
+   Adiar para o DOMContentLoaded garante que nada seja usado antes de existir,
+   hoje e a cada pedaço novo que for acrescentado depois. */
+function iniciarApp(){
+  iniciarEstoque();
+  novaVisita();
+  if(S.rascunho) R = JSON.parse(JSON.stringify(S.rascunho));
+  render();
+
+  /* Ao abrir o app: se houver internet e fila pendente, envia sozinho.
+     É o que garante que uma visita registrada sem sinal não fique esquecida. */
+  if(S.usuario && conectado() && S.visitas.some(v => v.sync !== 'OK')){
+    setTimeout(sincronizar, 900);
+  }
+}
+
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', iniciarApp);
+} else {
+  setTimeout(iniciarApp, 0);
 }
 
 /* ==========================================================================
