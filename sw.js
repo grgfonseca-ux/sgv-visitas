@@ -7,7 +7,7 @@
  * Ao publicar uma versão nova do index.html, troque VERSAO — senão o
  * aparelho continua servindo a versão antiga do cache.
  */
-const VERSAO = 'sgv-v3 ';
+const VERSAO = 'sgv-v4 ';
 const ARQUIVOS = ['./', './index.html', './manifest.json', './icone-192.png', './icone-512.png'];
 
 self.addEventListener('install', e => {
