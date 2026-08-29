@@ -220,6 +220,89 @@ select{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns=
 .mini{font-size:11.5px;color:var(--tinta3);line-height:1.5}
 .centro{text-align:center}
 </style>
+<style>
+/* ==========================================================================
+   PAINEL DO GESTOR — só aparece para quem entra com PERFIL = GESTOR
+   ========================================================================== */
+#app.largo{max-width:1180px}
+/* Com o painel aberto a barra de baixo acompanha a largura da tela;
+   uma ilha de 520px no meio de um monitor fica órfã. */
+body:has(#app.largo) .nav{max-width:none}
+.pn-barra{
+  background:var(--papel);border-bottom:1px solid var(--linha);padding:10px 14px;
+  display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end
+}
+.pn-campo{display:flex;flex-direction:column;gap:3px;flex:1 1 150px;min-width:130px}
+.pn-campo>label{font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--tinta3)}
+.pn-campo select{
+  font-family:inherit;font-size:14px;color:var(--tinta);background:var(--papel);
+  border:1px solid var(--linha);border-radius:9px;padding:8px 10px;width:100%
+}
+.pn-abas{
+  display:flex;gap:2px;background:var(--papel);border-bottom:1px solid var(--linha);
+  overflow-x:auto;padding:0 8px;position:sticky;top:0;z-index:20
+}
+.pn-aba{
+  background:none;border:none;border-bottom:2.5px solid transparent;cursor:pointer;
+  font-family:inherit;font-size:13.5px;font-weight:700;color:var(--tinta3);
+  padding:10px 11px;white-space:nowrap
+}
+.pn-aba.on{color:var(--verde);border-bottom-color:var(--verde)}
+.pn-corpo{padding:12px}
+.pn-grade{display:grid;gap:12px;grid-template-columns:repeat(12,1fr)}
+.pn-g12{grid-column:span 12}.pn-g6{grid-column:span 6}
+.pn-g7{grid-column:span 7}.pn-g5{grid-column:span 5}
+@media (max-width:860px){.pn-g6,.pn-g7,.pn-g5{grid-column:span 12}}
+.pn-placas{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));grid-column:span 12}
+.pn-placa{background:var(--papel);border:1px solid var(--linha);border-radius:var(--r);padding:12px 13px;box-shadow:var(--sombra)}
+.pn-placa .rot{font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--tinta3)}
+.pn-placa .val{font-size:25px;font-weight:700;letter-spacing:-.7px;margin:4px 0 2px;line-height:1.1;font-variant-numeric:tabular-nums}
+.pn-placa .sub{font-size:11.5px;color:var(--tinta2);line-height:1.35}
+.pn-placa.destaque{background:var(--verde-cl);border-color:var(--verde)}
+.pn-placa.destaque .val{color:var(--verde)}
+.pn-cartao{background:var(--papel);border:1px solid var(--linha);border-radius:var(--r);padding:14px 15px;box-shadow:var(--sombra)}
+.pn-cartao h3{margin:0;font-size:14.5px;font-weight:700;letter-spacing:-.1px}
+.pn-cartao .desc{font-size:12px;color:var(--tinta3);margin:3px 0 12px;line-height:1.4}
+.pn-nota{font-size:11.5px;color:var(--tinta3);margin-top:9px;line-height:1.45}
+.pn-rol{overflow-x:auto;margin:0 -15px;padding:0 15px}
+.pn-tab{border-collapse:collapse;width:100%;font-size:13px}
+.pn-tab th{
+  text-align:left;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+  color:var(--tinta3);padding:7px 8px;border-bottom:1px solid var(--tinta4);white-space:nowrap
+}
+.pn-tab td{padding:7px 8px;border-bottom:1px solid var(--linha);vertical-align:top}
+.pn-tab td.n,.pn-tab th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pn-tab .forte{font-weight:600}
+.pn-tab .fraco{color:var(--tinta3)}
+.pn-selo{display:inline-block;padding:2px 7px;border-radius:99px;font-size:11px;font-weight:700;white-space:nowrap}
+.pn-selo.bom{background:var(--verde-cl);color:var(--verde)}
+.pn-selo.aten{background:var(--ouro-cl);color:var(--ouro)}
+.pn-selo.ruim{background:var(--erro-cl);color:var(--erro)}
+.pn-selo.calmo{background:var(--fundo);color:var(--tinta2)}
+.pn-leg{display:flex;gap:14px;flex-wrap:wrap;margin:0 0 10px;font-size:12px;color:var(--tinta2)}
+.pn-leg span{display:inline-flex;align-items:center;gap:5px}
+.pn-leg i{width:10px;height:10px;border-radius:3px;display:block}
+.pn-vazio{padding:22px 8px;text-align:center;color:var(--tinta3);font-size:13px}
+.pn-carregando{padding:40px 16px;text-align:center;color:var(--tinta3);font-size:14px}
+.pn-acao{background:none;border:1px solid var(--linha);border-radius:7px;cursor:pointer;
+  font-family:inherit;font-size:11.5px;font-weight:600;color:var(--tinta2);padding:3px 8px}
+.pn-acao:hover{border-color:var(--verde);color:var(--verde)}
+.pn-fu{border-bottom:1px solid var(--linha);padding:11px 2px}
+.pn-fu:last-child{border-bottom:none}
+.pn-fu-topo{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.pn-fu-nome{font-weight:700;font-size:14px}
+.pn-fu-meta{font-size:11.5px;color:var(--tinta3)}
+.pn-fu-acao{
+  margin-top:6px;background:var(--fundo);border-left:3px solid var(--info);
+  border-radius:0 8px 8px 0;padding:7px 10px;font-size:13px;color:var(--tinta2);line-height:1.4
+}
+.pn-fu-acao b{color:var(--tinta);font-weight:600}
+#pn-dica{
+  position:fixed;pointer-events:none;z-index:100;opacity:0;transition:opacity .1s;
+  background:var(--tinta);color:#fff;padding:6px 9px;border-radius:7px;
+  font-size:12px;line-height:1.4;box-shadow:var(--sombra-g);max-width:230px
+}
+</style>
 </head>
 <body>
 <div id="app"></div>
@@ -434,24 +517,36 @@ function iniciarEstoque(){
   S.estoque = e;
   DB.gravar('estoque', e);
 }
+
 /* ==========================================================================
    TELAS
    ========================================================================== */
+
+function ehGestor(){
+  return !!(S.usuario && String(S.usuario.perfil || '').toUpperCase() === 'GESTOR');
+}
 
 function render(){
   if(!S.usuario){ telaLogin(); return; }
   const u = S.usuario;
   const naFila = S.visitas.filter(v => v.sync !== 'OK').length;
 
+  /* Gestor não registra visita. Se cair numa tela que não é dele, volta. */
+  if(ehGestor() && ['visita','agenda','estoque'].indexOf(S.tela) >= 0) S.tela = 'painel';
+  if(!ehGestor() && S.tela === 'painel') S.tela = 'home';
+
   let corpo = '';
-  if(S.tela === 'home')      corpo = telaHome();
+  if(S.tela === 'painel')    corpo = telaPainel();
+  else if(S.tela === 'home') corpo = telaHome();
   else if(S.tela === 'visita')  corpo = telaVisita();
   else if(S.tela === 'agenda')  corpo = telaAgenda();
   else if(S.tela === 'estoque') corpo = telaEstoque();
   else if(S.tela === 'dados')   corpo = telaDados();
 
   const titulos = {
-    home:['Olá, '+u.nome, u.perfil+' · meta '+u.meta+' visitas/mês'],
+    home: ehGestor() ? ['Olá, '+u.nome, 'GESTOR · visão de toda a equipe']
+                     : ['Olá, '+u.nome, u.perfil+' · meta '+u.meta+' visitas/mês'],
+    painel:['Painel comercial','Leitura gerencial das visitas'],
     visita:['Nova visita','Passo '+(S.passo+1)+' de 6'],
     agenda:['Agenda e follow up','Compromissos assumidos'],
     estoque:['Amostras e brindes','Seu saldo em mãos'],
@@ -459,6 +554,9 @@ function render(){
   };
   const [t1,t2] = titulos[S.tela] || ['SGV',''];
   const voltar = S.tela === 'visita';
+
+  /* O painel precisa de largura; o formulário do visitador, não. */
+  $('#app').className = (S.tela === 'painel' ? 'largo' : '');
 
   $('#app').innerHTML =
     '<div class="topo">' +
@@ -470,12 +568,16 @@ function render(){
       'padding:5px 10px;font-size:11.5px;font-weight:700;letter-spacing:.3px">' +
       'MODO DEMONSTRAÇÃO — nada é gravado na planilha</div>' : '') +
     (S.tela==='visita' ? barraPassos() : '') +
-    '<div class="tela ativa">' + corpo + '</div>' +
+    (S.tela === 'painel' ? corpo : '<div class="tela ativa">' + corpo + '</div>') +
     navegacao(naFila);
+
+  if(S.tela === 'painel') pnDesenhar();
 }
 
 function navegacao(naFila){
-  const itens = [
+  const itens = ehGestor()
+    ? [['home','⌂','Início'], ['painel','▦','Painel'], ['dados','⇅','Dados']]
+    : [
     ['home','⌂','Início'],
     ['visita','✎','Visita'],
     ['agenda','◷','Agenda'],
@@ -490,6 +592,7 @@ function navegacao(naFila){
 }
 
 function irPara(t){
+  if(t === 'painel'){ S.tela = 'painel'; render(); window.scrollTo(0,0); carregarPainel(); return; }
   if(t === 'visita' && S.tela !== 'visita'){
     if(!R.clienteNome && !S.rascunho) novaVisita();
     else if(S.rascunho && !R.clienteNome){ R = JSON.parse(JSON.stringify(S.rascunho)); }
@@ -501,6 +604,9 @@ function irPara(t){
 
 /* ---------- ENTRADA ---------- */
 function telaLogin(){
+  /* O painel precisa de largura; o formulário do visitador, não. */
+  $('#app').className = (S.tela === 'painel' ? 'largo' : '');
+
   $('#app').innerHTML =
     '<div class="topo"><h1>SGV Biodiversité<span class="sub">Sistema de Gestão de Visitas</span></h1></div>' +
     '<div class="tela ativa">' +
@@ -596,14 +702,26 @@ function abrirDemonstracao(){
 }
 
 function sair(){
-  if(!confirm('Sair do app? As visitas já registradas continuam salvas neste aparelho.')) return;
+  const naFila = S.visitas.filter(function(v){ return v.sync !== 'OK'; }).length;
+  if(naFila){
+    if(!confirm('ATENÇÃO: ' + naFila + ' visita(s) ainda não foram enviadas à planilha ' +
+                'e serão PERDIDAS ao trocar de usuário.\n\nSincronize antes. Sair mesmo assim?')) return;
+  } else if(!confirm('Trocar de usuário? Os dados deste visitador saem do aparelho.')) return;
+
+  /* Trocar de usuário apaga TUDO o que era do anterior. Sem isso, o próximo a
+     entrar veria as visitas, os clientes e o estoque de quem usou antes —
+     e poderia editá-los como se fossem dele. */
   S.usuario = null; S.demo = false;
-  DB.apagar('usuario'); DB.apagar('demo');
+  S.visitas = []; S.entregas = []; S.clientes = []; S.followups = [];
+  S.estoque = null; S.rascunho = null; S.passo = 0; S.tela = 'home';
+  ['usuario','demo','visitas','entregas','clientes','followups','estoque','rascunho']
+    .forEach(function(k){ DB.apagar(k); });
   render();
 }
 
 /* ---------- HOME ---------- */
 function telaHome(){
+  if(ehGestor()) return homeGestor();
   const u = S.usuario;
   const mes = hoje().slice(0,7);
   const doMes = S.visitas.filter(v => v.data && v.data.slice(0,7) === mes);
@@ -686,6 +804,7 @@ function cartaoVisita(v, permitirEditar){
       'onclick="abrirParaEditar(\'' + v.id + '\')">Editar</button></div>' : '') +
     '</div>' + selo + '</div>';
 }
+
 /* ==========================================================================
    WIZARD DE VISITA — 6 passos
    ========================================================================== */
@@ -705,6 +824,7 @@ function novaVisita(){
     clienteNome:'', clienteDoc:'', especialidade:'', cidade:'', uf:'', farmacia:'',
     telefone:'', email:'',
     apresentados: [],
+    produtoFoco: '', focoAuto: false,
     conhecidos: [],
     nivelConhece: '',
     interesse: '',
@@ -751,6 +871,7 @@ function abrirParaEditar(id){
     especialidade: v.especialidade || '', cidade: v.cidade || '', uf: v.uf || '',
     farmacia: v.farmacia || '', telefone: v.telefone || '', email: v.email || '',
     apresentados: (v.apresentados || '').split('|').map(function(x){return x.trim();}).filter(Boolean),
+    produtoFoco: v.produtoFoco || '', focoAuto: false,
     conhecidos:   (v.conhecidos   || '').split('|').map(function(x){return x.trim();}).filter(Boolean),
     nivelConhece: v.nivelConhece || '', interesse: v.interesse || '',
     entregas: entregas,
@@ -933,6 +1054,7 @@ function telaVisita(){
       '<div class="busca"><input type="text" placeholder="Filtrar ativos…" oninput="filtrarAtivos(this.value,\'ap\')"></div>' +
       '<div id="lista-ap" class="chips" style="max-height:190px;overflow-y:auto;padding:2px">' + listaAtivos('ap') + '</div>' +
       '<div class="mini" style="margin-top:6px">'+R.apresentados.length+' selecionado(s)</div>' +
+      blocoProdutoFoco() +
 
       '<div class="titulo-secao">Quais produtos da Biodiversité o cliente já conhece?</div>' +
       '<div class="busca"><input type="text" placeholder="Filtrar ativos…" oninput="filtrarAtivos(this.value,\'co\')"></div>' +
@@ -1094,7 +1216,40 @@ function alternarAtivo(tipo, a){
   const arr = tipo === 'ap' ? R.apresentados : R.conhecidos;
   const i = arr.indexOf(a);
   if(i >= 0) arr.splice(i,1); else arr.push(a);
+  if(tipo === 'ap') ajustarFoco();
   render();
+}
+
+/* ---------- PRODUTO QUE CONDUZIU A VISITA ----------
+   A venda é atribuída a UM produto. Sem isso, um produto fraco herda a
+   conversão do forte que estava na mesma visita e o indicador vira ruído.
+
+   Com um produto só apresentado a resposta é óbvia — o app preenche sozinho e
+   não pergunta. A pergunta aparece a partir de dois. */
+function ajustarFoco(){
+  if(R.apresentados.length === 1){ R.produtoFoco = R.apresentados[0]; R.focoAuto = true; return; }
+  /* O foco preenchido sozinho valia enquanto havia um produto só. Ao entrar o
+     segundo ele deixa de ser resposta e vira chute — some, para a pergunta ser
+     de fato respondida. O que a pessoa escolheu a dedo permanece. */
+  if(R.focoAuto){ R.produtoFoco = ''; R.focoAuto = false; }
+  if(R.apresentados.indexOf(R.produtoFoco) < 0) R.produtoFoco = '';
+}
+function escolherFoco(a){
+  R.produtoFoco = (R.produtoFoco === a ? '' : a);
+  R.focoAuto = false;
+  render();
+}
+function blocoProdutoFoco(){
+  if(R.apresentados.length < 2) return '';
+  return '<div class="divisor"></div>' +
+    '<label class="campo"><span>Qual produto conduziu a visita?</span>' +
+      '<div class="chips">' + R.apresentados.map(function(a){
+        return '<span class="chip '+(R.produtoFoco === a ? 'on' : '')+'" ' +
+          'onclick="escolherFoco(\''+a.replace(/'/g,"\\'")+'\')">'+esc(a)+'</span>';
+      }).join('') + '</div>' +
+      '<div class="ajuda">Aquele em que a conversa se concentrou. Se houver venda, ' +
+      'ela é creditada a este produto.</div>' +
+    '</label>';
 }
 
 function resumoFinal(){
@@ -1107,6 +1262,7 @@ function resumoFinal(){
     linhaR('Documento', R.clienteDoc || '—') +
     linhaR('Local', (R.cidade||'—') + (R.uf ? ' / '+R.uf : '')) +
     linhaR('Apresentados', R.apresentados.length ? R.apresentados.join(', ') : 'nenhum') +
+    (R.produtoFoco ? linhaR('Conduziu a visita', R.produtoFoco) : '') +
     linhaR('Já conhecia', R.conhecidos.length ? R.conhecidos.join(', ') : 'nenhum') +
     linhaR('Entregas', itens.length ? itens.map(([n,q]) => q+'× '+n).join('; ') : 'nenhuma') +
     linhaR('Venda', R.houveVenda === 'SIM' ? dinheiro(R.valorVenda) : R.houveVenda) +
@@ -1193,11 +1349,17 @@ function validarPasso(){
     if(!R.cidade.trim() || !R.uf){ toast('Informe cidade e UF','err'); return false; }
     if(R.tipoCliente !== 'FARMÁCIA' && !R.especialidade){ toast('Informe a especialidade','err'); return false; }
   }
+  /* Com dois ou mais produtos, o foco é obrigatório: é dele que sai a
+     conversão por produto. Campo opcional em app de campo vem vazio. */
+  if(p === 2 && R.apresentados.length >= 2 && !R.produtoFoco){
+    toast('Escolha qual produto conduziu a visita','err'); return false;
+  }
   if(p === 5 && R.precisaFollowup === 'SIM' && !R.followupData){
     toast('Informe a data do follow up','err'); return false;
   }
   return true;
 }
+
 /* ==========================================================================
    SALVAR · SINCRONIZAR · DEMAIS TELAS
    ========================================================================== */
@@ -1218,6 +1380,7 @@ function salvarVisita(){
     especialidade: R.especialidade, cidade: R.cidade, uf: R.uf, farmacia: R.farmacia,
     telefone: R.telefone, email: R.email,
     apresentados: R.apresentados.join(' | '),
+    produtoFoco: R.produtoFoco || (R.apresentados.length === 1 ? R.apresentados[0] : ''),
     conhecidos: R.conhecidos.join(' | '),
     qtdApresentados: R.apresentados.length,
     nivelConhece: R.nivelConhece, interesse: R.interesse,
@@ -1302,6 +1465,7 @@ function salvarCorrecao(){
     especialidade: R.especialidade, cidade: R.cidade, uf: R.uf, farmacia: R.farmacia,
     telefone: R.telefone, email: R.email,
     apresentados: R.apresentados.join(' | '),
+    produtoFoco: R.produtoFoco || (R.apresentados.length === 1 ? R.apresentados[0] : ''),
     conhecidos: R.conhecidos.join(' | '),
     qtdApresentados: R.apresentados.length,
     nivelConhece: R.nivelConhece, interesse: R.interesse,
@@ -1739,5 +1903,568 @@ render();
 if(S.usuario && conectado() && S.visitas.some(v => v.sync !== 'OK')){
   setTimeout(sincronizar, 900);
 }
+
+/* ==========================================================================
+   PAINEL DO GESTOR
+   --------------------------------------------------------------------------
+   Aparece só para quem entra com PERFIL = GESTOR. Os números vêm apurados do
+   servidor — o aplicativo não recebe as linhas da planilha, e por isso não
+   consegue mostrar visita de ninguém em detalhe além do que a tela pede.
+
+   O painel é ONLINE. Não faz sentido guardar em cache o mês inteiro da equipe
+   num aparelho que pode ser perdido, e o gestor não trabalha em consultório
+   sem sinal — o cenário offline é do visitador.
+   ========================================================================== */
+
+const PN = {
+  filtro: { periodo:'90', pessoa:'', perfil:'', uf:'', esp:'' },
+  aba: 'visao',
+  dados: null,
+  carregando: false,
+  erro: '',
+  cache: {}
+};
+
+const PERIODOS = {
+  '30':   'últimos 30 dias',
+  'mes':  'este mês',
+  '90':   'últimos 3 meses',
+  'tudo': 'todo o histórico'
+};
+
+function pnChave(){
+  const f = PN.filtro;
+  return [f.periodo, f.pessoa, f.perfil, f.uf, f.esp].join('|');
+}
+function pnIntervalo(){
+  const hj = new Date();
+  const iso = d => d.toISOString().slice(0,10);
+  if(PN.filtro.periodo === 'tudo') return { de:'', ate:'' };
+  if(PN.filtro.periodo === 'mes'){
+    return { de: iso(new Date(hj.getFullYear(), hj.getMonth(), 1)), ate: iso(hj) };
+  }
+  const d = new Date(hj); d.setDate(d.getDate() - Number(PN.filtro.periodo));
+  return { de: iso(d), ate: iso(hj) };
+}
+/* quantos meses o período representa — para pôr a meta na mesma escala */
+function pnMeses(){
+  const p = PN.filtro.periodo;
+  if(p === 'tudo') return Math.max(1, (PN.dados && PN.dados.porMes.length) || 1);
+  if(p === 'mes'){ const h = new Date(); return h.getDate() / 30; }
+  return Number(p) / 30;
+}
+
+function carregarPainel(forcar){
+  if(!ehGestor()) return;
+  const chave = pnChave();
+  if(!forcar && PN.cache[chave]){ PN.dados = PN.cache[chave]; PN.erro=''; render(); return; }
+  if(PN.carregando) return;
+
+  if(!S.config.url || !S.config.token){
+    PN.erro = 'Servidor não configurado. Vá em Dados e informe o endereço e o token.';
+    render(); return;
+  }
+  if(!conectado()){
+    PN.erro = 'O painel precisa de internet — ele apura os números na planilha a cada consulta.';
+    render(); return;
+  }
+
+  PN.carregando = true; PN.erro = ''; render();
+  const per = pnIntervalo();
+  enviarAoServidor({
+    acao:'painel', token:S.config.token,
+    filtro:{ de:per.de, ate:per.ate, pessoa:PN.filtro.pessoa,
+             perfil:PN.filtro.perfil, uf:PN.filtro.uf, especialidade:PN.filtro.esp }
+  }).then(function(r){
+    PN.carregando = false;
+    if(!r || r.ok === false){
+      PN.erro = (r && r.erro) || 'O servidor recusou a consulta.';
+      if(r && r.codigo === 'PERMISSAO') PN.erro = 'Este token não é de gestor.';
+    } else {
+      PN.dados = r; PN.cache[chave] = r;
+    }
+    render();
+  }).catch(function(e){
+    PN.carregando = false;
+    PN.erro = 'Não consegui falar com o servidor: ' + e.message;
+    render();
+  });
+}
+
+function pnFiltro(campo, valor){
+  PN.filtro[campo] = valor;
+  carregarPainel();
+}
+function pnAba(a){ PN.aba = a; render(); window.scrollTo(0,0); }
+
+/* ---------- formatação ---------- */
+const pnN   = n => Number(n||0).toLocaleString('pt-BR');
+const pnBRL = n => 'R$ ' + Math.round(Number(n)||0).toLocaleString('pt-BR');
+const pnBRL2= n => 'R$ ' + (Number(n)||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const pnPct = n => ((Number(n)||0)*100).toFixed(1).replace('.',',') + '%';
+const pnData= s => s ? s.slice(8,10)+'/'+s.slice(5,7)+'/'+s.slice(0,4) : '—';
+const PN_MES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+const pnRotMes = ym => PN_MES[Number(ym.slice(5,7))-1] + '/' + ym.slice(2,4);
+function pnSelo(txt, tom){ return '<span class="pn-selo '+tom+'">'+txt+'</span>'; }
+function pnSemVisita(c){ return c >= 0.30 ? 'bom' : c >= 0.20 ? 'aten' : 'ruim'; }
+/* conversão de produto é outra escala: a venda é atribuída a um produto só */
+function pnSemProduto(c){ return c >= 0.17 ? 'bom' : c >= 0.10 ? 'aten' : 'ruim'; }
+
+/* ---------- dica flutuante ---------- */
+function pnDica(){
+  let d = document.getElementById('pn-dica');
+  if(!d){ d = document.createElement('div'); d.id = 'pn-dica'; document.body.appendChild(d); }
+  return d;
+}
+function pnLigar(el, html){
+  el.addEventListener('mouseenter', function(e){ const d = pnDica(); d.innerHTML = html; d.style.opacity = 1; pnMover(e); });
+  el.addEventListener('mousemove', pnMover);
+  el.addEventListener('mouseleave', function(){ pnDica().style.opacity = 0; });
+}
+function pnMover(e){
+  const d = pnDica();
+  let x = e.clientX + 13, y = e.clientY - d.offsetHeight - 11;
+  if(x + d.offsetWidth > innerWidth - 8) x = e.clientX - d.offsetWidth - 13;
+  if(y < 8) y = e.clientY + 18;
+  d.style.left = x + 'px'; d.style.top = y + 'px';
+}
+
+/* ==========================================================================
+   GRÁFICOS — SVG puro, sem biblioteca
+   ========================================================================== */
+const pnCor = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim() || n;
+const PN_AZUL = '#2a78d6', PN_AZUL_CL = '#dceafb', PN_LARANJA = '#eb6834', PN_LARANJA_CL = '#fbe4da';
+const PN_FUNIL = ['#86b6ef','#2a78d6','#184f95'];
+
+function pnSvg(t, at){
+  const e = document.createElementNS('http://www.w3.org/2000/svg', t);
+  for(const k in at) e.setAttribute(k, at[k]);
+  return e;
+}
+
+/** Linha no tempo. serie = [{rot, val}] */
+function pnLinha(box, serie, opt){
+  opt = opt || {};
+  const w = Math.max(280, box.clientWidth), h = 190;
+  const ml = 50, mr = 12, mt = 12, mb = 24;
+  const pw = w - ml - mr, ph = h - mt - mb;
+  const max = Math.max.apply(null, serie.map(p => p.val)) * 1.15 || 1;
+  const x = i => ml + (serie.length === 1 ? pw/2 : i * pw / (serie.length - 1));
+  const y = v => mt + ph - (v / max) * ph;
+  const svg = pnSvg('svg', {width:w, height:h, viewBox:'0 0 '+w+' '+h, role:'img'});
+
+  for(let k = 0; k <= 3; k++){
+    const gy = mt + ph - (k/3)*ph;
+    svg.appendChild(pnSvg('line', {x1:ml, x2:w-mr, y1:gy, y2:gy, stroke:pnCor('--linha'), 'stroke-width':1}));
+    const t = pnSvg('text', {x:ml-8, y:gy+4, 'text-anchor':'end',
+      style:'font-size:10.5px;fill:'+pnCor('--tinta3')});
+    t.textContent = opt.moeda ? Math.round(max*k/3/1000)+'k' : Math.round(max*k/3);
+    svg.appendChild(t);
+  }
+  const d = serie.map((p,i) => (i?'L':'M') + x(i) + ' ' + y(p.val)).join(' ');
+  svg.appendChild(pnSvg('path', {d: d + ' L '+x(serie.length-1)+' '+(mt+ph)+' L '+x(0)+' '+(mt+ph)+' Z',
+    fill: opt.cor2 || PN_AZUL_CL}));
+  svg.appendChild(pnSvg('path', {d, fill:'none', stroke:opt.cor1 || PN_AZUL,
+    'stroke-width':2, 'stroke-linejoin':'round', 'stroke-linecap':'round'}));
+
+  serie.forEach(function(p,i){
+    const fim = i === serie.length - 1;
+    svg.appendChild(pnSvg('circle', {cx:x(i), cy:y(p.val), r: fim?5:4,
+      fill: fim ? (opt.cor1||PN_AZUL) : pnCor('--papel'),
+      stroke: opt.cor1||PN_AZUL, 'stroke-width':2}));
+    const t = pnSvg('text', {x:x(i), y:h-6, 'text-anchor':'middle',
+      style:'font-size:10.5px;fill:'+pnCor('--tinta3')});
+    t.textContent = p.rot; svg.appendChild(t);
+    const alvo = pnSvg('rect', {x:x(i)-pw/(serie.length*2)-2, y:mt, width:pw/serie.length+4,
+      height:ph, fill:'transparent'});
+    svg.appendChild(alvo);
+    pnLigar(alvo, '<b>'+p.rot+'</b><br>' + (opt.moeda ? pnBRL(p.val) : pnN(p.val)) + ' ' + (opt.unidade||''));
+  });
+  box.innerHTML = ''; box.appendChild(svg);
+}
+
+/** Barras horizontais com marcador de meta. itens = [{rot, val, meta, dica}] */
+function pnBarras(box, itens, opt){
+  opt = opt || {};
+  const w = Math.max(280, box.clientWidth);
+  const lh = 26, ml = opt.rotulo || 108, mr = 50;
+  const h = itens.length * lh + 8, pw = w - ml - mr;
+  const max = Math.max.apply(null, itens.map(i => Math.max(i.val, i.meta||0))) * 1.06 || 1;
+  const svg = pnSvg('svg', {width:w, height:h, viewBox:'0 0 '+w+' '+h, role:'img'});
+  itens.forEach(function(it, i){
+    const y = i*lh + 5, bh = 13;
+    const t = pnSvg('text', {x:ml-8, y:y+bh-2, 'text-anchor':'end',
+      style:'font-size:11.5px;fill:'+pnCor('--tinta2')});
+    t.textContent = it.rot; svg.appendChild(t);
+    svg.appendChild(pnSvg('rect', {x:ml, y, width:pw, height:bh, rx:4, fill:pnCor('--fundo')}));
+    /* Uma cor só: quem bateu a meta se lê pelo traço, não pela cor da barra. */
+    svg.appendChild(pnSvg('rect', {x:ml, y, width:Math.max(2,(it.val/max)*pw), height:bh, rx:4, fill:PN_AZUL}));
+    if(it.meta) svg.appendChild(pnSvg('rect', {x:ml+(it.meta/max)*pw-1, y:y-3, width:2, height:bh+6,
+      rx:1, fill:pnCor('--tinta3')}));
+    const vt = pnSvg('text', {x:ml+pw+7, y:y+bh-2,
+      style:'font-size:11.5px;font-weight:600;fill:'+pnCor('--tinta')});
+    vt.textContent = opt.moeda ? pnBRL(it.val) : pnN(it.val); svg.appendChild(vt);
+    const alvo = pnSvg('rect', {x:0, y:y-4, width:w, height:lh, fill:'transparent'});
+    svg.appendChild(alvo); pnLigar(alvo, it.dica || ('<b>'+it.rot+'</b><br>'+pnN(it.val)));
+  });
+  box.innerHTML = ''; box.appendChild(svg);
+}
+
+/** Duas séries. itens = [{rot, a, b, marca, dica}] */
+function pnDuplas(box, itens, opt){
+  opt = opt || {};
+  const w = Math.max(280, box.clientWidth);
+  const lh = 32, ml = opt.rotulo || 130, mr = 52;
+  const h = itens.length * lh + 6, pw = w - ml - mr;
+  const max = Math.max.apply(null, itens.map(i => i.a)) * 1.06 || 1;
+  const svg = pnSvg('svg', {width:w, height:h, viewBox:'0 0 '+w+' '+h, role:'img'});
+  itens.forEach(function(it, i){
+    const y = i*lh + 4, bh = 10;
+    const t = pnSvg('text', {x:ml-8, y:y+14, 'text-anchor':'end',
+      style:'font-size:11.5px;fill:'+pnCor('--tinta2')});
+    t.textContent = it.rot; svg.appendChild(t);
+    svg.appendChild(pnSvg('rect', {x:ml, y, width:Math.max(2,(it.a/max)*pw), height:bh, rx:4, fill:PN_AZUL}));
+    svg.appendChild(pnSvg('rect', {x:ml, y:y+bh+2, width:Math.max(2,(it.b/max)*pw), height:bh, rx:4, fill:PN_LARANJA}));
+    const vt = pnSvg('text', {x:ml+pw+7, y:y+16,
+      style:'font-size:11.5px;font-weight:600;fill:'+pnCor('--tinta')});
+    vt.textContent = it.marca; svg.appendChild(vt);
+    const alvo = pnSvg('rect', {x:0, y:y-3, width:w, height:lh, fill:'transparent'});
+    svg.appendChild(alvo); pnLigar(alvo, it.dica);
+  });
+  box.innerHTML = ''; box.appendChild(svg);
+}
+
+/** Funil. etapas = [{rot, val}] */
+function pnFunil(box, etapas){
+  const w = Math.max(260, box.clientWidth), eh = 50, h = etapas.length*eh + 4;
+  const base = etapas[0].val || 1;
+  const tinta = ['#0d2438','#ffffff','#ffffff'];
+  const svg = pnSvg('svg', {width:w, height:h, viewBox:'0 0 '+w+' '+h, role:'img'});
+  etapas.forEach(function(e, i){
+    const y = i*eh + 2, bh = 29;
+    const larg = Math.max(92, (e.val/base)*(w-4));
+    svg.appendChild(pnSvg('rect', {x:0, y, width:larg, height:bh, rx:5, fill:PN_FUNIL[i]||PN_FUNIL[2]}));
+    const t1 = pnSvg('text', {x:11, y:y+19,
+      style:'font-size:13px;font-weight:700;fill:'+(tinta[i]||'#fff')});
+    t1.textContent = pnN(e.val); svg.appendChild(t1);
+    const t2 = pnSvg('text', {x:0, y:y+bh+14, style:'font-size:11.5px;fill:'+pnCor('--tinta2')});
+    t2.textContent = e.rot + ' — ' + pnPct(e.val/base); svg.appendChild(t2);
+    const alvo = pnSvg('rect', {x:0, y, width:w, height:eh, fill:'transparent'});
+    svg.appendChild(alvo);
+    pnLigar(alvo, '<b>'+e.rot+'</b><br>'+pnN(e.val)+' · '+pnPct(e.val/base)+' das visitas');
+  });
+  box.innerHTML = ''; box.appendChild(svg);
+}
+
+/* ==========================================================================
+   TELAS
+   ========================================================================== */
+
+function homeGestor(){
+  const d = PN.dados, r = d && d.resumo;
+  return '<div class="cartao" style="text-align:center;padding:22px 18px">' +
+      '<div style="font-size:15px;color:var(--tinta2);line-height:1.5">' +
+        'Você entrou como <b>gestor</b>. Este perfil não registra visitas — ' +
+        'ele lê o que a equipe registrou.</div>' +
+      '<button class="btn" style="margin-top:16px" onclick="irPara(\'painel\')">' +
+        'Abrir painel comercial</button>' +
+    '</div>' +
+    (r ? '<div class="cartao"><div class="titulo-secao" style="margin-top:0">Última consulta</div>' +
+      '<div style="font-size:13.5px;color:var(--tinta2);line-height:1.7">' +
+      '<b>'+pnN(r.visitas)+'</b> visitas · conversão <b>'+pnPct(r.comVenda/(r.visitas||1))+'</b><br>' +
+      'vendido <b>'+pnBRL(r.valor)+'</b> · follow up vencido <b>'+pnN(r.fuVenc)+'</b></div></div>' : '') +
+    '<div class="cartao"><div class="titulo-secao" style="margin-top:0">O que você pode fazer aqui</div>' +
+      '<div class="ajuda" style="margin-top:0">Ler, filtrar e comparar. ' +
+      'Corrigir uma visita continua sendo do visitador, pelo aplicativo dele — ' +
+      'assim não se perde o registro de quem informou o quê.</div></div>';
+}
+
+function telaPainel(){
+  const d = PN.dados;
+  const f = PN.filtro;
+  const opc = (v, r, atual) => '<option value="'+esc(v)+'"'+(atual===v?' selected':'')+'>'+esc(r)+'</option>';
+  const pessoas = (d && d.equipe) || [];
+  const ufs = (d && d.dominios.ufs) || [];
+  const esps = (d && d.dominios.especialidades) || [];
+
+  const barra =
+    '<div class="pn-barra">' +
+      '<div class="pn-campo"><label>Período</label><select onchange="pnFiltro(\'periodo\',this.value)">' +
+        opc('30','Últimos 30 dias',f.periodo) + opc('mes','Este mês',f.periodo) +
+        opc('90','Últimos 3 meses',f.periodo) + opc('tudo','Tudo',f.periodo) + '</select></div>' +
+      '<div class="pn-campo"><label>Pessoa</label><select onchange="pnFiltro(\'pessoa\',this.value)">' +
+        opc('','Toda a equipe',f.pessoa) + pessoas.map(p => opc(p,p,f.pessoa)).join('') + '</select></div>' +
+      '<div class="pn-campo"><label>Perfil</label><select onchange="pnFiltro(\'perfil\',this.value)">' +
+        opc('','Todos',f.perfil) + opc('VISITADOR','Visitadores',f.perfil) +
+        opc('VENDEDOR','Vendedores',f.perfil) + '</select></div>' +
+      '<div class="pn-campo"><label>Estado</label><select onchange="pnFiltro(\'uf\',this.value)">' +
+        opc('','Todos',f.uf) + ufs.map(u => opc(u,u,f.uf)).join('') + '</select></div>' +
+      '<div class="pn-campo"><label>Especialidade</label><select onchange="pnFiltro(\'esp\',this.value)">' +
+        opc('','Todas',f.esp) + esps.map(e => opc(e,e,f.esp)).join('') + '</select></div>' +
+    '</div>';
+
+  const abas = [['visao','Visão geral'],['equipe','Equipe'],['produtos','Produtos'],
+                ['carteira','Carteira'],['followup','Follow up'],['visitas','Visitas']];
+  const nav = '<div class="pn-abas">' + abas.map(([id,rot]) =>
+    '<button class="pn-aba '+(PN.aba===id?'on':'')+'" onclick="pnAba(\''+id+'\')">'+rot+'</button>').join('') + '</div>';
+
+  let corpo;
+  if(PN.carregando) corpo = '<div class="pn-carregando">Apurando na planilha…<br>' +
+    '<span style="font-size:12px">Alguns segundos. A conta é feita no servidor.</span></div>';
+  else if(PN.erro) corpo = '<div class="pn-corpo"><div class="cartao" style="border-color:var(--erro)">' +
+    '<div style="color:var(--erro);font-weight:700;margin-bottom:6px">Não deu para carregar</div>' +
+    '<div style="font-size:13.5px;color:var(--tinta2)">'+esc(PN.erro)+'</div>' +
+    '<button class="btn" style="margin-top:12px" onclick="carregarPainel(true)">Tentar de novo</button></div></div>';
+  else if(!PN.dados) corpo = '<div class="pn-carregando">Toque em um filtro para carregar.</div>';
+  else corpo = '<div class="pn-corpo"><div class="pn-grade">' + (PN_TELAS[PN.aba] || PN_TELAS.visao)(PN.dados) + '</div></div>';
+
+  return barra + nav + corpo;
+}
+
+const PN_TELAS = {};
+
+/* ---------- VISÃO GERAL ---------- */
+PN_TELAS.visao = function(d){
+  const r = d.resumo;
+  const conv = r.comVenda / (r.visitas || 1);
+  return '<div class="pn-placas">' +
+      pnPlaca('Visitas', pnN(r.visitas), pnN(r.clientes)+' clientes distintos', true) +
+      pnPlaca('Conversão', pnPct(conv), pnN(r.comVenda)+' fecharam venda') +
+      pnPlaca('Vendido', pnBRL(r.valor), pnBRL(r.valor/(r.visitas||1))+' por visita') +
+      pnPlaca('Ticket médio', pnBRL(r.comVenda ? r.valor/r.comVenda : 0), 'só das visitas com venda') +
+      pnPlaca('Follow up vencido', pnN(r.fuVenc), pnN(r.fuPend)+' no prazo · '+pnN(r.fuOk)+' cumpridos') +
+      pnPlaca('Custo de amostras', pnBRL(r.custo),
+        r.custo ? pnBRL2(r.custo/(r.visitas||1))+' por visita' : 'preencha VALOR_UNIT na planilha') +
+    '</div>' +
+
+    pnCartao('pn-g6','Visitas por mês','Volume registrado no aplicativo.', '<div id="pn-g-visitas"></div>') +
+    pnCartao('pn-g6','Vendido nas visitas R$',
+      'Soma do campo Valor da Venda. Um gráfico por medida — escalas diferentes não dividem eixo.',
+      '<div id="pn-g-vendido"></div>') +
+
+    pnCartao('pn-g5','Desfecho das visitas','Em que proporção cada coisa aconteceu.',
+      '<div id="pn-g-funil"></div>' +
+      '<p class="pn-nota">Entregar amostra e fechar venda são desfechos independentes — ' +
+      'há venda sem amostra e amostra sem venda. A distância entre as duas barras diz ' +
+      'se a amostra está puxando venda ou saindo sem retorno.</p>') +
+
+    pnCartao('pn-g7','Conversão por especialidade','Dez mais visitadas no período.',
+      '<div class="pn-rol"><table class="pn-tab"><thead><tr><th>Especialidade</th>' +
+      '<th class="n">Visitas</th><th class="n">Vendas</th><th class="n">Conversão</th>' +
+      '<th class="n">Vendido</th></tr></thead><tbody>' +
+      d.porEspecialidade.slice(0,10).map(function(e){
+        const c = e.comVenda/(e.visitas||1);
+        return '<tr><td class="forte">'+esc(e.nome)+'</td><td class="n">'+pnN(e.visitas)+'</td>' +
+          '<td class="n">'+pnN(e.comVenda)+'</td><td class="n">'+pnSelo(pnPct(c), pnSemVisita(c))+'</td>' +
+          '<td class="n">'+pnBRL(e.valor)+'</td></tr>';
+      }).join('') + '</tbody></table></div>');
+};
+
+/* ---------- EQUIPE ---------- */
+PN_TELAS.equipe = function(d){
+  const meses = pnMeses();
+  return pnCartao('pn-g12','Visitas X Metas',
+      'Barra = visitas no período. Traço cinza = meta proporcional aos ' + PERIODOS[PN.filtro.periodo] + '.',
+      '<div id="pn-g-equipe"></div>' +
+      '<p class="pn-nota">Meta mensal de 80 visitas para visitador e 35 para vendedor, ' +
+      'ajustada ao tamanho do período escolhido.</p>') +
+
+    pnCartao('pn-g12','Desempenho por pessoa','Toque no nome para filtrar o painel por ela.',
+      '<div class="pn-rol"><table class="pn-tab"><thead><tr><th>Pessoa</th><th>Perfil</th>' +
+      '<th class="n">Visitas</th><th class="n">% da meta</th><th class="n">Conversão</th>' +
+      '<th class="n">Vendido</th><th class="n">Ticket</th><th class="n">FU vencido</th></tr></thead><tbody>' +
+      d.porPessoa.map(function(p){
+        const alvo = Math.round(p.meta * meses);
+        const rel = alvo ? p.visitas/alvo : 0;
+        const conv = p.comVenda/(p.visitas||1);
+        return '<tr><td><button class="pn-acao" onclick="pnFiltro(\'pessoa\',\''+esc(p.nome)+'\')">' +
+          esc(p.nome)+'</button></td>' +
+          '<td class="fraco">'+esc(p.perfil === 'VISITADOR' ? 'Visitador · '+p.base : 'Vendedor')+'</td>' +
+          '<td class="n forte">'+pnN(p.visitas)+'</td>' +
+          '<td class="n">'+pnSelo((rel*100).toFixed(0)+'%', rel>=1?'bom':rel>=0.85?'aten':'ruim')+'</td>' +
+          '<td class="n">'+pnSelo(pnPct(conv), pnSemVisita(conv))+'</td>' +
+          '<td class="n">'+pnBRL(p.valor)+'</td>' +
+          '<td class="n fraco">'+pnBRL(p.comVenda ? p.valor/p.comVenda : 0)+'</td>' +
+          '<td class="n">'+(p.fuVenc ? pnSelo(pnN(p.fuVenc),'ruim') : '<span class="fraco">—</span>')+'</td></tr>';
+      }).join('') + '</tbody></table></div>');
+};
+
+/* ---------- PRODUTOS ---------- */
+PN_TELAS.produtos = function(d){
+  const semFoco = d.resumo.vendasSemFoco;
+  return pnCartao('pn-g12','Apresentado × vendas geradas',
+      'Doze mais apresentados. À direita, a conversão de cada um.',
+      '<div class="pn-leg"><span><i style="background:'+PN_AZUL+'"></i>Visitas em que foi apresentado</span>' +
+      '<span><i style="background:'+PN_LARANJA+'"></i>Vendas atribuídas a ele</span></div>' +
+      '<div id="pn-g-prod"></div>' +
+      '<p class="pn-nota">Barra azul longa com laranja curta é o sinal a procurar: muito discurso, ' +
+      'pouca conversão. Pode ser preço, indicação errada ou material de apoio fraco.</p>' +
+      (semFoco ? '<p class="pn-nota"><b>'+pnN(semFoco)+' venda(s) sem produto informado</b> — ' +
+        'visitas anteriores à pergunta "qual produto conduziu a visita". Elas contam no ' +
+        'faturamento, mas não são creditadas a nenhum produto.</p>' : '')) +
+
+    pnCartao('pn-g12','Detalhe por produto',
+      'A venda é atribuída ao produto que conduziu a conversa, não a todos os citados — ' +
+      'senão um produto fraco herda a conversão do forte que estava na mesma visita.',
+      '<div class="pn-rol"><table class="pn-tab"><thead><tr><th>Produto</th>' +
+      '<th class="n">Apresentado</th><th class="n">Vendas</th><th class="n">Conversão</th>' +
+      '<th class="n">Já conhecia</th></tr></thead><tbody>' +
+      d.porProduto.map(function(p){
+        const t = p.apres ? p.vendas/p.apres : 0;
+        return '<tr><td class="forte">'+esc(p.nome)+'</td><td class="n">'+pnN(p.apres)+'</td>' +
+          '<td class="n">'+pnN(p.vendas)+'</td>' +
+          '<td class="n">'+(p.apres ? pnSelo(pnPct(t), pnSemProduto(t)) : '<span class="fraco">—</span>')+'</td>' +
+          '<td class="n fraco">'+pnN(p.conhece)+'</td></tr>';
+      }).join('') + '</tbody></table></div>');
+};
+
+/* ---------- CARTEIRA ---------- */
+PN_TELAS.carteira = function(d){
+  const c = d.carteira;
+  return '<div class="pn-placas">' +
+      pnPlaca('Clientes na carteira', pnN(c.total), 'cadastro acumulado, não só o período', true) +
+      pnPlaca('Visitados uma só vez', pnN(c.umaVez), c.total ? pnPct(c.umaVez/c.total)+' da carteira' : '') +
+      pnPlaca('Sem visita há 60 dias', pnN(c.frios), 'carteira esfriando') +
+      pnPlaca('Visitados por duas pessoas', pnN(c.dobrados), 'possível sobreposição de rota') +
+    '</div>' +
+
+    pnCartao('pn-g5','Visitas por estado','Onde a equipe esteve no período.', '<div id="pn-g-uf"></div>') +
+
+    pnCartao('pn-g7','Clientes que mais compraram','Acumulado do cadastro.',
+      '<div class="pn-rol"><table class="pn-tab"><thead><tr><th>Cliente</th><th>Especialidade</th>' +
+      '<th>Cidade</th><th class="n">Visitas</th><th class="n">Comprou</th></tr></thead><tbody>' +
+      c.topClientes.map(t => '<tr><td class="forte">'+esc(t.nome)+'</td>' +
+        '<td class="fraco">'+esc(t.esp)+'</td><td class="fraco">'+esc(t.cidade)+'/'+esc(t.uf)+'</td>' +
+        '<td class="n">'+pnN(t.visitas)+'</td><td class="n">'+pnBRL(t.total)+'</td></tr>').join('') +
+      '</tbody></table></div>') +
+
+    pnCartao('pn-g12','Carteira fria — sem visita há mais de 60 dias',
+      'Trinta primeiros, do mais esquecido para o menos. Não depende do período: ' +
+      'cliente esquecido não aparece num filtro de 30 dias.',
+      '<div class="pn-rol"><table class="pn-tab"><thead><tr><th>Cliente</th><th>Documento</th>' +
+      '<th>Especialidade</th><th>Cidade</th><th>Responsável</th><th class="n">Última</th>' +
+      '<th class="n">Dias</th><th class="n">Comprou</th></tr></thead><tbody>' +
+      (c.listaFrios.map(t => '<tr><td class="forte">'+esc(t.nome)+'</td>' +
+        '<td class="fraco">'+esc(t.doc||'—')+'</td><td class="fraco">'+esc(t.esp)+'</td>' +
+        '<td class="fraco">'+esc(t.cidade)+'/'+esc(t.uf)+'</td><td>'+esc(t.pessoa)+'</td>' +
+        '<td class="n">'+pnData(t.ultima)+'</td>' +
+        '<td class="n">'+pnSelo(pnN(t.dias), t.dias>120?'ruim':'aten')+'</td>' +
+        '<td class="n">'+(t.total?pnBRL(t.total):'<span class="fraco">—</span>')+'</td></tr>').join('')
+        || '<tr><td colspan="8" class="pn-vazio">Nenhum cliente frio.</td></tr>') +
+      '</tbody></table></div>');
+};
+
+/* ---------- FOLLOW UP ---------- */
+PN_TELAS.followup = function(d){
+  const r = d.resumo, venc = d.followup.vencidos;
+  const jaVenceram = r.fuOk + r.fuVenc;
+  const porPessoa = {};
+  venc.forEach(function(f){ porPessoa[f.pessoa] = (porPessoa[f.pessoa]||0) + 1; });
+  const pessoas = Object.keys(porPessoa).sort(function(a,b){ return porPessoa[b]-porPessoa[a]; });
+
+  return '<div class="pn-placas">' +
+      pnPlaca('Compromissos assumidos', pnN(r.fuTotal),
+        r.visitas ? pnPct(r.fuTotal/r.visitas)+' das visitas' : '', true) +
+      pnPlaca('Vencidos', pnN(r.fuVenc), 'passaram da data sem conclusão') +
+      pnPlaca('No prazo', pnN(r.fuPend), 'a data ainda não chegou') +
+      pnPlaca('Taxa de cumprimento', pnPct(jaVenceram ? r.fuOk/jaVenceram : 0), 'dos que já venceram') +
+    '</div>' +
+
+    pnCartao('pn-g5','Vencidos por pessoa',
+      'Indicador de disciplina, não de esforço: mede o que foi prometido ao cliente e não voltou.',
+      '<div class="pn-rol"><table class="pn-tab"><thead><tr><th>Pessoa</th>' +
+      '<th class="n">Vencidos</th></tr></thead><tbody>' +
+      (pessoas.map(p => '<tr><td class="forte">'+esc(p)+'</td>' +
+        '<td class="n">'+pnSelo(pnN(porPessoa[p]),'ruim')+'</td></tr>').join('')
+        || '<tr><td colspan="2" class="pn-vazio">Nada vencido no período.</td></tr>') +
+      '</tbody></table></div>') +
+
+    pnCartao('pn-g7','O que ficou combinado e não voltou',
+      'A ação é o texto que o próprio visitador escreveu na visita. ' +
+      'O gestor lê e cobra; a correção continua sendo dele, pelo aplicativo.',
+      (venc.map(function(f){
+        return '<div class="pn-fu">' +
+          '<div class="pn-fu-topo">' +
+            '<span class="pn-fu-nome">'+esc(f.cliente)+'</span>' +
+            pnSelo('venceu em '+pnData(f.data),'ruim') +
+          '</div>' +
+          '<div class="pn-fu-meta">'+esc(f.pessoa)+' · '+esc(f.cidade)+'/'+esc(f.uf)+
+            (f.prioridade ? ' · prioridade '+esc(f.prioridade) : '')+'</div>' +
+          '<div class="pn-fu-acao"><b>Ficou de:</b> ' +
+            esc(f.acao || 'o visitador não descreveu a ação combinada') + '</div>' +
+        '</div>';
+      }).join('') || '<div class="pn-vazio">Nenhum compromisso vencido no período.</div>'));
+};
+
+/* ---------- VISITAS ---------- */
+PN_TELAS.visitas = function(d){
+  return pnCartao('pn-g12','Visitas registradas',
+    'As ' + pnN(d.visitas.length) + ' mais recentes do filtro atual. É a aba VISITAS, legível.',
+    '<div class="pn-rol"><table class="pn-tab"><thead><tr><th class="n">Data</th><th>Cliente</th>' +
+    '<th>Especialidade</th><th>Cidade</th><th>Responsável</th><th>Conduziu</th>' +
+    '<th class="n">Entregou</th><th class="n">Venda</th></tr></thead><tbody>' +
+    (d.visitas.map(v => '<tr><td class="n">'+pnData(v.data)+'</td>' +
+      '<td class="forte">'+esc(v.cliente)+'</td><td class="fraco">'+esc(v.esp)+'</td>' +
+      '<td class="fraco">'+esc(v.cidade)+'/'+esc(v.uf)+'</td><td>'+esc(v.pessoa)+'</td>' +
+      '<td class="fraco">'+esc(v.foco || '—')+'</td>' +
+      '<td class="n fraco">'+(v.itens||'—')+'</td>' +
+      '<td class="n">'+(v.venda?'<span class="forte">'+pnBRL(v.valor)+'</span>':'<span class="fraco">—</span>')+'</td></tr>').join('')
+      || '<tr><td colspan="8" class="pn-vazio">Nenhuma visita no filtro.</td></tr>') +
+    '</tbody></table></div>');
+};
+
+/* ---------- peças ---------- */
+function pnPlaca(rot, val, sub, destaque){
+  return '<div class="pn-placa'+(destaque?' destaque':'')+'">' +
+    '<div class="rot">'+esc(rot)+'</div><div class="val">'+val+'</div>' +
+    '<div class="sub">'+sub+'</div></div>';
+}
+function pnCartao(classe, titulo, desc, corpo){
+  return '<div class="pn-cartao '+classe+'"><h3>'+esc(titulo)+'</h3>' +
+    (desc ? '<p class="desc">'+esc(desc)+'</p>' : '') + corpo + '</div>';
+}
+
+/* ---------- desenho dos gráficos, depois do HTML no ar ---------- */
+function pnDesenhar(){
+  const d = PN.dados; if(!d) return;
+  const box = id => document.getElementById(id);
+
+  if(box('pn-g-visitas'))
+    pnLinha(box('pn-g-visitas'), d.porMes.map(m => ({rot:pnRotMes(m.ym), val:m.visitas})), {unidade:'visitas'});
+  if(box('pn-g-vendido'))
+    pnLinha(box('pn-g-vendido'), d.porMes.map(m => ({rot:pnRotMes(m.ym), val:m.valor})),
+      {moeda:true, cor1:PN_LARANJA, cor2:PN_LARANJA_CL});
+  if(box('pn-g-funil')){
+    /* Entregar amostra e fechar venda são desfechos independentes: uma venda
+       pode sair sem amostra nenhuma. Por isso não é funil — as barras são
+       ordenadas por tamanho, e não por etapa. */
+    const desfechos = [
+      {rot:'Com amostra ou brinde entregue', val:d.resumo.comEntrega},
+      {rot:'Com venda fechada', val:d.resumo.comVenda}
+    ].sort(function(a,b){ return b.val - a.val; });
+    pnFunil(box('pn-g-funil'), [{rot:'Visitas realizadas', val:d.resumo.visitas}].concat(desfechos));
+  }
+  if(box('pn-g-equipe')){
+    const meses = pnMeses();
+    pnBarras(box('pn-g-equipe'), d.porPessoa.map(function(p){
+      const alvo = Math.round(p.meta * meses);
+      return { rot:p.nome, val:p.visitas, meta:alvo,
+        dica:'<b>'+p.nome+'</b> — '+p.perfil.toLowerCase()+'<br>' +
+             pnN(p.visitas)+' de '+pnN(alvo)+' previstas ('+(alvo?((p.visitas/alvo)*100).toFixed(0):0)+'%)<br>' +
+             'conversão '+pnPct(p.comVenda/(p.visitas||1))+' · '+pnBRL(p.valor) };
+    }), {rotulo:112});
+  }
+  if(box('pn-g-prod'))
+    pnDuplas(box('pn-g-prod'), d.porProduto.slice(0,12).map(function(p){
+      const t = p.apres ? p.vendas/p.apres : 0;
+      return { rot:p.nome, a:p.apres, b:p.vendas, marca:pnPct(t),
+        dica:'<b>'+p.nome+'</b><br>apresentado em '+pnN(p.apres)+' visitas<br>' +
+             'fechou venda em '+pnN(p.vendas)+' — conversão '+pnPct(t)+'<br>' +
+             'citado como já conhecido '+pnN(p.conhece)+' vezes' };
+    }), {rotulo:132});
+  if(box('pn-g-uf'))
+    pnBarras(box('pn-g-uf'), d.porUF.map(u => ({rot:u.uf, val:u.visitas,
+      dica:'<b>'+u.uf+'</b><br>'+pnN(u.visitas)+' visitas · '+pnN(u.clientes)+' clientes'})), {rotulo:38});
+}
+
 </script>
-</body></html>
